@@ -67,7 +67,7 @@ class ClaudeJudgeTest(unittest.TestCase):
         self.assertTrue(verdict["valid"])
         self.assertEqual((verdict["judge"], verdict["label"], verdict["verdict"]), ("claude", "judgment", "relevant"))
         self.assertEqual(verdict["model"], "claude-sonnet-5-5")
-        record = json.loads((self.dir / "claude" / verdict["record"]).read_text(encoding="utf-8"))
+        record = json.loads((self.dir / verdict["record"]).read_text(encoding="utf-8"))
         self.assertTrue(record["validation"]["valid"])
         self.assertEqual(record["prompt"]["file"], "baseline.txt")
         self.assertEqual(record["claude_code"]["tools"], [])
@@ -200,7 +200,7 @@ class ClaudeJudgeTest(unittest.TestCase):
         first = self.judge(FakeCLI(rate_limit=True))
         second = self.judge(FakeCLI())
         self.assertNotEqual(first["record"], second["record"])
-        record = json.loads((self.dir / "claude" / first["record"]).read_text(encoding="utf-8"))
+        record = json.loads((self.dir / first["record"]).read_text(encoding="utf-8"))
         self.assertNotIn("rate_limit_event", json.dumps(record["events"]))
 
 

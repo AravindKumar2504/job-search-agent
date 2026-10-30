@@ -334,7 +334,7 @@ def judge(job: dict, resume: dict, *, prompt_path: Path, record_dir: Path, model
         verdict["reason"] = f"the call failed: Claude Code could not be run ({type(exc).__name__})"
         record["validation"] = {"valid": False, "problems": [verdict["reason"]]}
     record["verdict"] = {k: verdict.get(k) for k in ("verdict", "valid", "reason")}
-    verdict["record"] = _save(record, Path(record_dir), job.get("id") or "", label)
+    verdict["record"] = f"{Path(record_dir).name}/{_save(record, Path(record_dir), job.get('id') or '', label)}"
     verdict["lines"] = _lines(verdict)
     return verdict
 
@@ -373,12 +373,12 @@ def _save(record: dict, folder: Path, posting_id: str, label: str) -> str:
 
 def _lines(verdict: dict) -> list:
     if not verdict["valid"]:
-        return [f"No valid judgment: {verdict.get('reason')}", f"Call saved as claude/{verdict['record']}."]
+        return [f"No valid judgment: {verdict.get('reason')}", f"Call saved as {verdict['record']}."]
     return [
         f"Justification: {verdict['justification']}",
         f"Résumé fields cited: {', '.join(verdict['resume_fields'])}",
         f"Posting fields cited: {', '.join(verdict['posting_fields'])}",
         "Quotes: " + ("; ".join(f'"{q}"' for q in verdict["quotes"]) or "none"),
         f"Model {verdict['model']}, {verdict['date']}, prompt {verdict['prompt']['file']} "
-        f"(SHA-256 {verdict['prompt']['sha256'][:12]}); call saved as claude/{verdict['record']}.",
+        f"(SHA-256 {verdict['prompt']['sha256'][:12]}); call saved as {verdict['record']}.",
     ]
