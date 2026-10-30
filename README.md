@@ -72,7 +72,7 @@ python3 tools/action_surfaces.py agent
 
 - **The rule** on the baseline board: 95 of 814 postings relevant for Jane.
 - **Sampling** ([experiment/SAMPLING.md](experiment/SAMPLING.md)): repeated verdicts were repeatable, not right: postings 1 and 4 got "relevant" on every valid try, and I labeled both not relevant. On posting 5 the verdict flipped inside three broken replies, each holding a "not_relevant" answer and then a "corrected" "relevant" one; the validator rejected them.
-- **Prompt experiment** ([experiment/EXPERIMENT.md](experiment/EXPERIMENT.md)), scored with the contract's validator and my current labels: development set, baseline 8/10, revision 10/10; held-out set, baseline 8/10, revision 9/10; rule 8/10 on both; majority class 7/10 on both. The revision's held-out edge rests on one posting I relabeled after seeing the results, and the report shows every other scoring. Ten cases cannot separate these prompts.
+- **Prompt experiment** ([experiment/EXPERIMENT.md](experiment/EXPERIMENT.md)), scored with the contract's validator and my current labels: development set, baseline 8/10, revision 10/10; held-out set, baseline 8/10, revision 9/10; rule 8/10 on both; majority class 7/10 on both. The revision's held-out edge rests on one posting I relabeled after seeing the results, and the report shows every other scoring. Ten cases cannot separate these prompts. The agent keeps the baseline prompt, my contract's seven checks; the specialty point waits for a contract v0.2.
 - **Action surfaces** ([ACTION-SURFACE.md](ACTION-SURFACE.md)): pasted text (the agent's design), a file to read, and an agent with fetch and write tools, which could not read the 13.5 MB board and still gave a verdict.
 
 ## Known limits of the rule

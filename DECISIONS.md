@@ -17,3 +17,4 @@ Every choice below was mine, made in the Claude Code app on 2026-10-30 (Eastern 
 | 06:32 | The agent keeps the baseline prompt; I run live run 2 myself on Saturday; GitHub waits for Saturday, after review; the action surfaces are run for real, all three. | ce7aea6 |
 | 07:00 | An independent review of the whole repo before anything is public. | 5ab508d |
 | 07:25 | Rewrite the three commits that held my account name, before the first push; keep my contract's wording; relabel posting 11 as a missing specialty and report both scorings. | history before 5ab508d, c254ab9 |
+| 07:40 | After the rescoring, keep the baseline prompt: it is my contract's seven checks, and ten cases cannot separate it from the revision. The specialty point waits for a contract v0.2. | README.md |
