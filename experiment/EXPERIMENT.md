@@ -11,19 +11,20 @@ My 20 hand labels (`labels/labels.json`) are the answer key. Each prompt was ask
 | Majority class (always not_relevant) | 7/10 (70%) | 40% to 89% |
 | Rule (record) | 8/10 (80%) | 49% to 94% |
 | Claude, baseline prompt | 8/10 (80%) | 49% to 94% |
+| Claude, revision-specialty prompt | 10/10 (100%) | 72% to 100% |
 
-| # | Posting | My label | Rule | Claude, baseline |
-|---|---|---|---|---|
-| 1 | Product Reliability Engineer | not_relevant | relevant | relevant |
-| 2 | Field Engineer | not_relevant | not_relevant | not_relevant |
-| 3 | Software Engineer, Privacy Engineering (Lawful Access) | not_relevant | not_relevant | not_relevant |
-| 4 | Software Engineer, Compute Foundations Systems | not_relevant | relevant | relevant |
-| 5 | Full Stack Software Engineer, Cybersecurity Products | relevant | relevant | relevant |
-| 6 | AI Support Engineer - Singapore (Korean Speaking) | not_relevant | not_relevant | not_relevant |
-| 7 | Software Engineer, Implicit Signals | relevant | relevant | relevant |
-| 8 | Software Engineer, Compute - Storage | relevant | relevant | relevant |
-| 9 | Dedicated Support Engineer - Toronto | not_relevant | not_relevant | not_relevant |
-| 10 | Camera Software Engineer, Consumer Devices | not_relevant | not_relevant | not_relevant |
+| # | Posting | My label | Rule | Claude, baseline | Claude, revision-specialty |
+|---|---|---|---|---|---|
+| 1 | Product Reliability Engineer | not_relevant | relevant | relevant | not_relevant |
+| 2 | Field Engineer | not_relevant | not_relevant | not_relevant | not_relevant |
+| 3 | Software Engineer, Privacy Engineering (Lawful Access) | not_relevant | not_relevant | not_relevant | not_relevant |
+| 4 | Software Engineer, Compute Foundations Systems | not_relevant | relevant | relevant | not_relevant |
+| 5 | Full Stack Software Engineer, Cybersecurity Products | relevant | relevant | relevant | relevant |
+| 6 | AI Support Engineer - Singapore (Korean Speaking) | not_relevant | not_relevant | not_relevant | not_relevant |
+| 7 | Software Engineer, Implicit Signals | relevant | relevant | relevant | relevant |
+| 8 | Software Engineer, Compute - Storage | relevant | relevant | relevant | relevant |
+| 9 | Dedicated Support Engineer - Toronto | not_relevant | not_relevant | not_relevant | not_relevant |
+| 10 | Camera Software Engineer, Consumer Devices | not_relevant | not_relevant | not_relevant | not_relevant |
 
 ## Held-out set (10 postings: 4 relevant, 6 not relevant by my labels)
 
@@ -31,17 +32,42 @@ My 20 hand labels (`labels/labels.json`) are the answer key. Each prompt was ask
 |---|---|---|
 | Majority class (always not_relevant) | 6/10 (60%) | 31% to 83% |
 | Rule (record) | 9/10 (90%) | 60% to 98% |
-| Claude, baseline prompt | not run | |
+| Claude, baseline prompt | 10/10 (100%) | 72% to 100% |
+| Claude, revision-specialty prompt | 9/10 (90%) | 60% to 98% |
 
-| # | Posting | My label | Rule | Claude, baseline |
-|---|---|---|---|---|
-| 11 | Systems Software Engineer, Silicon Bringup | relevant | relevant | not run |
-| 12 | Partner AI Deployment Engineer - AWS | not_relevant | not_relevant | not run |
-| 13 | Lab Operations Engineer, Systems Integration | Consumer Devices | not_relevant | not_relevant | not run |
-| 14 | Full Stack Software Engineer, Growth | relevant | relevant | not run |
-| 15 | Software Engineer, Codex Core Agents | relevant | relevant | not run |
-| 16 | iOS Engineer, Applied Foundations | not_relevant | not_relevant | not run |
-| 17 | Field Service Engineer | not_relevant | not_relevant | not run |
-| 18 | Design Engineer, Power Generation | not_relevant | not_relevant | not run |
-| 19 | Software Engineer, Workload Enablement | not_relevant | relevant | not run |
-| 20 | Software Engineer, Integrity Foundations | relevant | relevant | not run |
+| # | Posting | My label | Rule | Claude, baseline | Claude, revision-specialty |
+|---|---|---|---|---|---|
+| 11 | Systems Software Engineer, Silicon Bringup | relevant | relevant | relevant | not_relevant |
+| 12 | Partner AI Deployment Engineer - AWS | not_relevant | not_relevant | not_relevant | not_relevant |
+| 13 | Lab Operations Engineer, Systems Integration | Consumer Devices | not_relevant | not_relevant | not_relevant | not_relevant |
+| 14 | Full Stack Software Engineer, Growth | relevant | relevant | relevant | relevant |
+| 15 | Software Engineer, Codex Core Agents | relevant | relevant | relevant | relevant |
+| 16 | iOS Engineer, Applied Foundations | not_relevant | not_relevant | not_relevant | not_relevant |
+| 17 | Field Service Engineer | not_relevant | not_relevant | not_relevant | not_relevant |
+| 18 | Design Engineer, Power Generation | not_relevant | not_relevant | not_relevant | not_relevant |
+| 19 | Software Engineer, Workload Enablement | not_relevant | relevant | not_relevant | not_relevant |
+| 20 | Software Engineer, Integrity Foundations | relevant | relevant | relevant | relevant |
+
+## The one change
+
+```diff
+--- prompts/baseline.txt
++++ prompts/revision-specialty.txt
+@@ -5 +5 @@
+-Answer "relevant" only if all seven of these hold. Otherwise answer "not_relevant".
++Answer "relevant" only if all eight of these hold. Otherwise answer "not_relevant".
+@@ -12,0 +13 @@
++8. Specialty: no requirement listed as required asks for a specialty that the résumé (its skills, experience and projects) does not show, for example GPU kernels, compilers or chip design. Lines marked as nice to have, a plus, bonus or preferred do not count.
+```
+
+## What this shows, and what it cannot
+
+On the development set the revision scored 10 of 10 and the baseline 8 of 10. That gain was expected: the one change was chosen after seeing the baseline's two development misses (postings 1 and 4, both labeled as a missing specialty), so the development set is no longer a fair test of it.
+
+On the held-out set, run once per prompt after both development runs, the order reversed: the baseline scored 10 of 10 and the revision 9 of 10. The revision's one held-out miss is posting 11 (Systems Software Engineer, Silicon Bringup), which it judged a missing specialty ("it asks for silicon bringup and validation"); I labeled it relevant. Whether that is the prompt's error, or a posting my own labeling rule's specialty part would also reject, is a question about the label that this run cannot settle.
+
+The rule (a record) scored 8 of 10 and 9 of 10. Its held-out miss is posting 19, whose requirement "5+ years in one or more of: ML systems, performance engineering, distributed systems, or HPC." never says "experience", so check 7 as written skips it. Both prompts called it not relevant; the baseline's reply cites the "5+ years". The majority class scored 7 of 10 and 6 of 10.
+
+How little ten cases show: one posting moves a pass rate by 10 points; every interval above overlaps the others; and each prompt answered each posting once, while the sampling report shows that a single reply can break the format. This experiment cannot say that either prompt is better. It does show the specialty point flipping verdicts in both directions on real postings.
+
+Disclosure: Claude Code read the held-out postings' text and my held-out labels while preparing my labeling questions, before any Claude judge call. I chose the one change from the development results, and the held-out set ran only after both development runs, as tools/experiment.py enforces.

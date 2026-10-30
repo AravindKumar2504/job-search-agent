@@ -14,6 +14,7 @@ An answer the validator rejects counts as a miss. Labels come from labels/labels
 
 from __future__ import annotations
 
+import difflib
 import json
 import math
 import sys
@@ -29,6 +30,45 @@ EXPERIMENT = REPO / "experiment"
 BASELINE_RESPONSE = REPO / "runs" / "2026-10-30T093102Z" / "response.json"
 SETS = ("development", "held_out")
 Z = 1.96  # 95% Wilson interval
+
+# The written conclusions. Drafted by Claude Code from the saved calls on 2026-10-30; the calls never change
+# (the tool refuses to re-run a set), so the numbers they cite stay true.
+SAMPLING_CONCLUSIONS = (
+    "Repeating a verdict shows repeatability, not correctness. Postings 1 and 4 got \"relevant\" on all five tries, "
+    "and my label says \"not_relevant\" (a required specialty Jane lacks): the prompt applies its seven checks the "
+    "same way every time, and those checks say nothing about specialties. Postings 7 and 8 got my label's verdict on "
+    "all five tries.\n\n"
+    "The variation that did appear was in the format, not the verdict. Three of the five replies on posting 5 held "
+    "two answers: a first JSON object saying \"not_relevant\" with a confused justification, then a line beginning "
+    "\"Correction\", then a second object saying \"relevant\". The validator rejected all three as not one JSON "
+    "object, as the contract requires, so they count as no valid judgment; a looser parser would have kept one of "
+    "the two answers without saying so. Both valid replies on posting 5 matched my label.\n\n"
+    "What these 25 calls cannot show: five tries per posting cannot pin down a rate (3 of 5 has a 95% Wilson interval "
+    "of 23% to 88%); the five postings come from one board on one day, chosen because the rule passes them, not at "
+    "random; and another model, prompt or day could behave differently. Agreement with my label is agreement with "
+    "one person's reading."
+)
+EXPERIMENT_CONCLUSIONS = (
+    "On the development set the revision scored 10 of 10 and the baseline 8 of 10. That gain was expected: the one "
+    "change was chosen after seeing the baseline's two development misses (postings 1 and 4, both labeled as a "
+    "missing specialty), so the development set is no longer a fair test of it.\n\n"
+    "On the held-out set, run once per prompt after both development runs, the order reversed: the baseline scored "
+    "10 of 10 and the revision 9 of 10. The revision's one held-out miss is posting 11 (Systems Software Engineer, "
+    "Silicon Bringup), which it judged a missing specialty (\"it asks for silicon bringup and validation\"); I "
+    "labeled it relevant. Whether that is the prompt's error, or a posting my own labeling rule's specialty part "
+    "would also reject, is a question about the label that this run cannot settle.\n\n"
+    "The rule (a record) scored 8 of 10 and 9 of 10. Its held-out miss is posting 19, whose requirement \"5+ years "
+    "in one or more of: ML systems, performance engineering, distributed systems, or HPC.\" never says "
+    "\"experience\", so check 7 as written skips it. Both prompts called it not relevant; the baseline's reply cites "
+    "the \"5+ years\". The majority class scored 7 of 10 and 6 of 10.\n\n"
+    "How little ten cases show: one posting moves a pass rate by 10 points; every interval above overlaps the "
+    "others; and each prompt answered each posting once, while the sampling report shows that a single reply can "
+    "break the format. This experiment cannot say that either prompt is better. It does show the specialty point "
+    "flipping verdicts in both directions on real postings.\n\n"
+    "Disclosure: Claude Code read the held-out postings' text and my held-out labels while preparing my labeling "
+    "questions, before any Claude judge call. I chose the one change from the development results, and the "
+    "held-out set ran only after both development runs, as tools/experiment.py enforces."
+)
 
 
 def load():
@@ -104,6 +144,7 @@ def records(folder: Path):
         if data.get("validation", {}).get("valid"):
             answer = json.loads(data["answer_text"])
         found.append({"file": f"{folder.name}/{path.name}", "label": data.get("label", ""), "id": data["posting_id"],
+                      "answer_text": data.get("answer_text") or "",
                       "valid": data.get("validation", {}).get("valid", False), "verdict": (answer or {}).get("verdict"),
                       "justification": (answer or {}).get("justification"), "model": data.get("model"),
                       "date": (data.get("started_at") or "")[:10], "problems": data.get("validation", {}).get("problems", []),
@@ -150,10 +191,17 @@ def sampling_report(jobs, labels, jane) -> str:
     out += ["## Each justification, as received", ""]
     for c in calls:
         item = by_id[c["id"]]
-        out.append(f"- `{c['label']}` (posting {item['n']}, {c['date']}): **{c['verdict'] or 'no valid judgment'}**. "
-                   + (c["justification"] or "; ".join(c["problems"])))
-    out.append("")
+        said = c["justification"] or ("; ".join(c["problems"]) + ". The reply, as received, begins: "
+                                      + json.dumps(c["answer_text"][:160]) + " and later says: "
+                                      + json.dumps(_correction(c["answer_text"])))
+        out.append(f"- `{c['label']}` (posting {item['n']}, {c['date']}): **{c['verdict'] or 'no valid judgment'}**. {said}")
+    out += ["", "## What this shows, and what it cannot", "", SAMPLING_CONCLUSIONS, ""]
     return "\n".join(out)
+
+
+def _correction(text: str) -> str:
+    at = text.find("Correction")
+    return text[at: at + 120] if at >= 0 else "(no correction line)"
 
 
 def experiment_report(jobs, labels, jane) -> str:
@@ -196,6 +244,13 @@ def experiment_report(jobs, labels, jane) -> str:
                 row.append("not run" if c is None else (c["verdict"] or "invalid"))
             out.append("| " + " | ".join(row) + " |")
         out.append("")
+    revisions = [s for s in prompts if s != "baseline"]
+    if revisions:
+        diff = difflib.unified_diff((REPO / "prompts" / "baseline.txt").read_text(encoding="utf-8").splitlines(),
+                                    (REPO / "prompts" / f"{revisions[0]}.txt").read_text(encoding="utf-8").splitlines(),
+                                    "prompts/baseline.txt", f"prompts/{revisions[0]}.txt", lineterm="", n=0)
+        out += ["## The one change", "", "```diff", *diff, "```", ""]
+    out += ["## What this shows, and what it cannot", "", EXPERIMENT_CONCLUSIONS, ""]
     return "\n".join(out)
 
 
