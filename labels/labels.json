@@ -13,8 +13,8 @@
       "not_relevant": 7
     },
     "held_out": {
-      "relevant": 4,
-      "not_relevant": 6
+      "relevant": 3,
+      "not_relevant": 7
     }
   },
   "labels": [
@@ -128,10 +128,13 @@
       "set": "held_out",
       "id": "d1121575-a1a7-47c9-97e6-56c70f441143",
       "title": "Systems Software Engineer, Silicon Bringup",
-      "label": "relevant",
-      "reason": null,
+      "label": "not_relevant",
+      "reason": "missing specialty",
       "picked": "\"Relevant\"",
-      "batch": 2
+      "batch": 2,
+      "first_label": "relevant",
+      "relabeled_utc": "2026-10-30T11:31:21Z",
+      "relabel_reason": "Its required lines (bringing up or validating silicon; low-level debugging across firmware, drivers and hardware interfaces) are the same kind of specialty I used to label postings 1 and 4 not relevant. Relabeled on 2026-10-30 after the Claude calls, when an independent review pointed this out; the first label is kept here and in commit 882909e, and the experiment reports both."
     },
     {
       "n": 12,
