@@ -50,6 +50,18 @@ class PrivacyScanTest(unittest.TestCase):
                     found.append(f"{rel}: a phone number outside 555-0100 to 555-0199")
         self.assertEqual(found, [], "\n".join(sorted(set(found))))
 
+    def test_no_file_names_this_machines_home_folder(self):
+        # Records write the home folder as ~ (the account name stays off GitHub).
+        home = str(Path.home())
+        found = []
+        for path in repo_files():
+            try:
+                if home in path.read_text(encoding="utf-8"):
+                    found.append(str(path.relative_to(REPO)))
+            except (UnicodeDecodeError, OSError):
+                continue
+        self.assertEqual(found, [], "files naming the home folder: " + ", ".join(found))
+
     def test_the_scan_would_catch_a_real_email_and_phone(self):
         sample = "Reach me at jane.doe" + "@" + "gmail.com or (617) 432-" + "0142."
         self.assertEqual(EMAIL.findall(sample), ["jane.doe" + "@" + "gmail.com"])

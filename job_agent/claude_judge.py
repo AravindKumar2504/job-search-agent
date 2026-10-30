@@ -309,7 +309,8 @@ def judge(job: dict, resume: dict, *, prompt_path: Path, record_dir: Path, model
         binary = Path(binary) if binary else find_claude()
         with tempfile.TemporaryDirectory(prefix="job-agent-claude-") as folder:
             argv = command(binary, model, system)
-            record["command"] = command(binary, model, f"<the system prompt in prompts/{Path(prompt_path).name}>")
+            record["command"] = [_tilde(arg) for arg in
+                                 command(binary, model, f"<the system prompt in prompts/{Path(prompt_path).name}>")]
             record["environment"] = sorted(environment(binary))
             raw = runner(argv, request["user"].encode("utf-8"), folder, environment(binary))
             record.update(exit_code=raw["exit_code"], seconds=raw["seconds"], timed_out=raw["timed_out"],
@@ -337,6 +338,12 @@ def judge(job: dict, resume: dict, *, prompt_path: Path, record_dir: Path, model
     verdict["record"] = f"{Path(record_dir).name}/{_save(record, Path(record_dir), job.get('id') or '', label)}"
     verdict["lines"] = _lines(verdict)
     return verdict
+
+
+def _tilde(text: str) -> str:
+    """This Mac's home folder written as ~, so a record never names the account."""
+    home = str(Path.home())
+    return text.replace(home, "~") if len(home) > 1 else text
 
 
 def _for_the_record(stdout: bytes) -> list:
