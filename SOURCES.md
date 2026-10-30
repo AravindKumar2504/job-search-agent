@@ -13,7 +13,7 @@ The same holds for the rest: every decision is mine and is logged with its commi
 - Wrote Jane Doe's résumé to match the contract's fields.
 - Ran the Friday baseline at my word, and every Claude call in `experiment/` (68 on 2026-10-30).
 - Prepared the labeling excerpts. While doing so it read the held-out postings and my held-out labels, before any Claude judge call; the experiment report says so.
-- Drafted CONTRACT.md, LABELING-RULE.md, ACTION-SURFACE.md, the experiment reports' conclusions and this file from my decisions and the saved results.
+- Drafted CONTRACT.md, LABELING-RULE.md, ACTION-SURFACE.md, the experiment reports' conclusions and this file from my decisions and the saved results, and organized my FRICTIONAL.md entries from my own messages, picks and commands each day, at my request.
 
 ## What I used
 
