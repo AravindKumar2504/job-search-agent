@@ -1,0 +1,110 @@
+"""Plant each wrong version from CONTRACT.md in a copy of the code and check that the tests fail.
+
+A suite that still passes when the code is broken proves nothing. Each mutant below swaps one piece
+of code for a plausible mistake. The first entries are the contract's "Wrong versions" (W1 to W4);
+the ones marked "extra" are further mistakes the tests also have to catch. The copy lives in a
+temporary folder, so the repo itself is never touched. A mutant is "caught" when a test fails.
+
+Usage (from the repo root):  python3 tools/mutants.py
+Exit 0 when every mutant is caught, 1 when one survives, 2 when the unbroken copy fails or a
+mutant's target text is not found exactly once.
+
+The approach (exact text swaps on a copy, one at a time) follows Klaxon's scripts/mutation_check.py.
+"""
+
+from __future__ import annotations
+
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+COPIED = ("job_agent", "tests", "persona")
+
+# (label, file, old text, new text)
+MUTANTS = [
+    ("W1 saves seen ids too early", "job_agent/watch.py",
+     "    found = state_mod.diff(previous, jobs)\n",
+     "    state_mod.save(state_path, state_mod.next_state(previous, jobs, record))\n"
+     "    found = state_mod.diff(state_mod.load(state_path), jobs)\n"),
+    ("W3 look-alike host passes (substring)", "job_agent/allowlist.py",
+     "    if host not in ALLOWED_HOSTS:", "    if not any(allowed in host for allowed in ALLOWED_HOSTS):"),
+    ("W3 look-alike host passes (prefix)", "job_agent/allowlist.py",
+     "    if host not in ALLOWED_HOSTS:", "    if not any(host.startswith(allowed) for allowed in ALLOWED_HOSTS):"),
+    ("W3 look-alike host passes (suffix)", "job_agent/allowlist.py",
+     "    if host not in ALLOWED_HOSTS:", "    if not any(host.endswith(allowed) for allowed in ALLOWED_HOSTS):"),
+    ("extra: redirects are followed", "job_agent/fetch.py",
+     "urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirects())",
+     "urllib.request.build_opener(urllib.request.ProxyHandler({}))"),
+    ("extra: proxy settings from the environment are used", "job_agent/fetch.py",
+     "urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirects())",
+     "urllib.request.build_opener(NoRedirects())"),
+    ("extra: a non-200 answer is used", "job_agent/board.py",
+     "    if status != 200:", "    if False:"),
+    ("extra: the baseline reports every posting as new", "job_agent/state.py",
+     "        return Diff(baseline=True)", "        return Diff(baseline=True, new=list(jobs))"),
+    ("extra: ids are forgotten when a posting disappears", "job_agent/state.py",
+     '    seen = set(previous["seen_ids"]) if previous else set()\n    order, listed = [], set()',
+     "    seen = set()\n    order, listed = [], set()"),
+    ("extra: a saved run folder is reused", "job_agent/evidence.py",
+     "path.mkdir(parents=True, exist_ok=False)", "path.mkdir(parents=True, exist_ok=True)"),
+    ("extra: a resume not marked fictional passes", "job_agent/resume.py",
+     '    if data.get("fictional") is not True:', '    if data.get("fictional") is False:'),
+    ("extra: any email mentioning example.com passes", "job_agent/resume.py",
+     'not re.fullmatch(r"[^@\\s]+@example\\.com", email)', 'not re.search(r"@example\\.com", email)'),
+    ("extra: Claude gets the contact fields", "job_agent/resume.py",
+     "if key not in CONTACT_FIELDS}", 'if key != "name"}'),
+]
+
+
+def run_tests(work: Path) -> subprocess.CompletedProcess:
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    args = [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-t", "."]
+    try:
+        return subprocess.run(args, cwd=work, env=env, capture_output=True, text=True, timeout=600)
+    except subprocess.TimeoutExpired:  # a suite that hangs under a mutant did not pass
+        return subprocess.CompletedProcess(args, 1, "", "the tests did not end within 600 s")
+
+
+def main() -> int:
+    work = Path(tempfile.mkdtemp(prefix="job-agent-mutants-"))
+    try:
+        for item in COPIED:
+            shutil.copytree(REPO / item, work / item, ignore=shutil.ignore_patterns("__pycache__"))
+        for label, file, old, new in MUTANTS:
+            text = (work / file).read_text(encoding="utf-8")
+            if text.count(old) != 1:
+                print(f"{label}: the text to break is not found exactly once in {file}")
+                return 2
+            compile(text.replace(old, new), file, "exec")
+        baseline = run_tests(work)
+        if baseline.returncode != 0:
+            print("the unbroken copy FAILS its tests:\n" + baseline.stderr[-3000:])
+            return 2
+        print("unbroken copy passes")
+        survived = []
+        for label, file, old, new in MUTANTS:
+            path = work / file
+            original = path.read_text(encoding="utf-8")
+            path.write_text(original.replace(old, new), encoding="utf-8")
+            try:
+                result = run_tests(work)
+            finally:
+                path.write_text(original, encoding="utf-8")
+            caught = result.returncode != 0
+            failing = [line.split(" (")[0] for line in result.stderr.splitlines() if line.startswith(("FAIL:", "ERROR:"))]
+            detail = f"{len(failing)} failing, first {failing[0]}" if failing else ""
+            print(f"{'caught  ' if caught else 'SURVIVED'}  {label}   {detail}")
+            if not caught:
+                survived.append(label)
+        print(f"\n{len(MUTANTS) - len(survived)} of {len(MUTANTS)} planted mistakes caught")
+        return 1 if survived else 0
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
