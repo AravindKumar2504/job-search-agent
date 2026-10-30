@@ -6,8 +6,9 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import CONTRACT_VERSION, resume, watch
+from . import CONTRACT_VERSION, claude_judge, resume, watch
 from .errors import BrokenInput, Refused
+from .judges import PROMPTS, Judges
 
 REPO = Path(__file__).resolve().parent.parent
 DEFAULT_RESUME = REPO / "persona" / "jane-doe.json"
@@ -24,6 +25,8 @@ def main(argv=None) -> int:
     run.add_argument("--runs", type=Path, default=DEFAULT_RUNS)
     run.add_argument("--replay", type=Path, help="read a saved response instead of fetching; labeled as a replay, "
                      "and it needs its own --state and --runs")
+    run.add_argument("--prompt", type=Path, default=PROMPTS / "baseline.txt", help="the Claude judge's prompt contract")
+    run.add_argument("--model", default=claude_judge.DEFAULT_MODEL, help="the Claude judge's model")
     check = commands.add_parser("check-resume", help="validate a résumé and run nothing else")
     check.add_argument("path", type=Path, nargs="?", default=DEFAULT_RESUME)
     args = parser.parse_args(argv)
@@ -34,7 +37,8 @@ def main(argv=None) -> int:
             return 0
         if args.replay is not None and (_same(args.state, DEFAULT_STATE) or _same(args.runs, DEFAULT_RUNS)):
             raise Refused("refused: a replay needs its own --state and --runs, so it never mixes with the live runs")
-        watch.run(resume_path=args.resume, state_path=args.state, runs_root=args.runs, replay=args.replay)
+        watch.run(resume_path=args.resume, state_path=args.state, runs_root=args.runs, replay=args.replay,
+                  judge=Judges(prompt=args.prompt, model=args.model))
         return 0
     except Refused as exc:
         print(exc, file=sys.stderr)

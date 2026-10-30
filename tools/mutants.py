@@ -22,7 +22,8 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-COPIED = ("job_agent", "tests", "persona", "runs")  # runs/: the rule's tests read the real baseline response
+# runs/: the rule's tests read the real baseline response; labels/ and tools/: the selection and label tests.
+COPIED = ("job_agent", "tests", "persona", "runs", "labels", "tools", "prompts")
 
 # (label, file, old text, new text)
 MUTANTS = [
@@ -38,6 +39,26 @@ MUTANTS = [
      "    if host not in ALLOWED_HOSTS:", "    if not any(host.startswith(allowed) for allowed in ALLOWED_HOSTS):"),
     ("W3 look-alike host passes (suffix)", "job_agent/allowlist.py",
      "    if host not in ALLOWED_HOSTS:", "    if not any(host.endswith(allowed) for allowed in ALLOWED_HOSTS):"),
+    ("W4 citation-free answer passes (empty list)", "job_agent/claude_judge.py",
+     "        if not isinstance(fields, list) or not fields:", "        if not isinstance(fields, list):"),
+    ("W4 citation-free answer passes (field never sent)", "job_agent/claude_judge.py",
+     "        unknown = [f for f in fields if not isinstance(f, str) or f not in allowed[key]]",
+     "        unknown = [f for f in fields if not isinstance(f, str)]"),
+    ("extra: an invented quote passes", "job_agent/claude_judge.py",
+     "            if not isinstance(quote, str) or not quote.strip() or not any(_plain(quote) in t for t in texts):",
+     "            if not isinstance(quote, str):"),
+    ("extra: an extra key passes", "job_agent/claude_judge.py",
+     "    if keys != set(ANSWER_KEYS):", "    if not set(ANSWER_KEYS) <= keys:"),
+    ("extra: a CLI that loaded tools is trusted", "job_agent/claude_judge.py",
+     "    if tools:\n        return", "    if False:\n        return"),
+    ("extra: an API-key login is trusted", "job_agent/claude_judge.py",
+     '    if init.get("apiKeySource") != SEAT:', "    if False:"),
+    ("extra: a reply of several turns is trusted", "job_agent/claude_judge.py",
+     '    if result.get("num_turns") != 1:', "    if False:"),
+    ("extra: at signs reach the CLI as typed", "job_agent/claude_judge.py",
+     '    return kept.replace("@", FULLWIDTH_AT)', "    return kept"),
+    ("extra: the API key is passed on to the CLI", "job_agent/claude_judge.py",
+     'PASSED_ON = ("HOME",', 'PASSED_ON = ("ANTHROPIC_API_KEY", "HOME",'),
     ("extra: redirects are followed", "job_agent/fetch.py",
      "urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirects())",
      "urllib.request.build_opener(urllib.request.ProxyHandler({}))"),

@@ -67,7 +67,7 @@ class WatchTest(unittest.TestCase):
     def test_gone_postings_are_listed_by_id_and_title_and_not_judged(self):
         judged = []
 
-        def judge(job_data, resume):
+        def judge(job_data, resume, run_dir):
             judged.append(job_data["id"])
             return stub_judge(job_data, resume)
 
@@ -119,7 +119,7 @@ class WatchTest(unittest.TestCase):
         self.run_once(board_bytes(A), judge=None)
         before = self.state.read_bytes()
 
-        def failing(job_data, resume):
+        def failing(job_data, resume, run_dir):
             raise RuntimeError("judge crashed")
 
         with self.assertRaises(RuntimeError):

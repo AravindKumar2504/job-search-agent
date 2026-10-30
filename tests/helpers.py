@@ -65,7 +65,7 @@ class Clock:
         return current
 
 
-def stub_judge(job_data, resume):
+def stub_judge(job_data, resume, run_dir=None):
     """A judge double for watch tests: the real judges are tested on their own."""
     return {"rule": {"verdict": "relevant", "lines": ["stub rule verdict"]},
             "claude": {"verdict": "not_relevant", "lines": ["stub Claude verdict"]}}

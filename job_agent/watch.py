@@ -54,7 +54,7 @@ def _finish(run_dir, run_id, started, source, digest, response, resume, previous
     }
     found = state_mod.diff(previous, jobs)
     record.update(new=len(found.new), gone=len(found.gone))
-    verdicts = {job["id"]: judge(job, resume) for job in found.new}
+    verdicts = {job["id"]: judge(job, resume, run_dir) for job in found.new}
     c = report.counts(found, verdicts)
     line = report.counts_line(run_id, postings, c, found.baseline)
     summary = {
