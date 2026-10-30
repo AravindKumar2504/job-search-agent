@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from . import CONTRACT_VERSION, claude_judge, resume, watch
-from .errors import BrokenInput, Refused
+from .errors import BrokenInput, NoAnswer, Refused
 from .judges import PROMPTS, Judges
 
 REPO = Path(__file__).resolve().parent.parent
@@ -46,8 +46,11 @@ def main(argv=None) -> int:
     except BrokenInput as exc:
         print(f"stopped: {exc}", file=sys.stderr)
         return 2
-    except OSError as exc:  # no answer at all (DNS, TLS, timeout): nothing was saved, the state is unchanged
-        print(f"stopped: no answer from the board ({type(exc).__name__}: {exc})", file=sys.stderr)
+    except NoAnswer as exc:  # nothing was saved, the state is unchanged
+        print(f"stopped: {exc}", file=sys.stderr)
+        return 1
+    except OSError as exc:  # a file the run needed could not be read or written; the state is unchanged
+        print(f"stopped: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
 
 

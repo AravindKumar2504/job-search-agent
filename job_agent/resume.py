@@ -12,7 +12,7 @@ import json
 import re
 from pathlib import Path
 
-from .errors import Refused
+from .errors import BrokenInput, Refused
 
 CONTACT_FIELDS = ("name", "email", "phone", "links")
 MONTH = re.compile(r"\d{4}-(0[1-9]|1[0-2])")
@@ -32,15 +32,25 @@ RULE_FIELDS = {
 }
 
 
+PERSONA_PROBLEMS = ("it is not a JSON object", 'it is not marked "fictional": true', "name is missing",
+                    "email does not end in @example.com", "phone is not a number from 555-0100 to 555-0199")
+
+
 def load(path: Path) -> dict:
-    path = Path(path)
+    """A valid fictional persona, or Refused (not a fictional persona) or BrokenInput (a field the rule reads is wrong).
+
+    Messages name fields, never values, and never the file's name.
+    """
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, ValueError) as exc:
-        raise Refused(f"refused: the résumé {path.name} could not be read as JSON ({type(exc).__name__})") from None
+        raise BrokenInput(f"the résumé file could not be read as JSON ({type(exc).__name__})") from None
     problems = problems_with(data)
+    persona = [p for p in problems if p in PERSONA_PROBLEMS]
+    if persona:
+        raise Refused("refused: the résumé file is not a fictional persona: " + "; ".join(persona))
     if problems:
-        raise Refused(f"refused: the résumé {path.name} is not a valid fictional persona: " + "; ".join(problems))
+        raise BrokenInput("the résumé file fails validation: " + "; ".join(problems))
     return data
 
 

@@ -61,6 +61,23 @@ class CliTest(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("not JSON", err)
 
+    def test_a_missing_prompt_file_stops_before_any_fetch_with_exit_2(self):
+        code, _, err = call("run", "--replay", str(self.saved), "--state", str(self.dir / "s.json"),
+                            "--runs", str(self.dir / "runs"), "--prompt", str(self.dir / "no-such-prompt.txt"))
+        self.assertEqual(code, 2)
+        self.assertIn("prompt file", err)
+        self.assertFalse((self.dir / "runs").exists())
+
+    def test_a_resume_with_a_broken_rule_field_exits_2(self):
+        data = json.loads(PERSONA.read_text(encoding="utf-8"))
+        del data["experience"]["full_time_years"]
+        path = self.dir / "broken.json"
+        path.write_text(json.dumps(data), encoding="utf-8")
+        code, _, err = call("check-resume", str(path))
+        self.assertEqual(code, 2)
+        self.assertIn("experience.full_time_years", err)
+        self.assertNotIn("broken.json", err)  # the file's name is never printed
+
 
 if __name__ == "__main__":
     unittest.main()

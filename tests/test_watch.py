@@ -11,7 +11,7 @@ import unittest
 from pathlib import Path
 
 from job_agent import watch
-from job_agent.errors import BrokenInput, Refused
+from job_agent.errors import BrokenInput, NoAnswer, Refused
 
 from .helpers import PERSONA, Clock, FakeGet, board_bytes, job, response, stub_judge
 
@@ -198,6 +198,47 @@ class WatchTest(unittest.TestCase):
         self.assertIn("not a live run", summary["source"])
         meta = json.loads(next(other_runs.iterdir()).joinpath("response.meta.json").read_text(encoding="utf-8"))
         self.assertIn("replay", meta["source"])
+
+    def test_a_screen_that_fails_leaves_the_state_unchanged(self):
+        self.run_once(board_bytes(A), judge=None)
+        before = self.state.read_bytes()
+
+        def broken_screen(text):
+            raise BrokenPipeError("the screen went away")
+
+        with self.assertRaises(BrokenPipeError):
+            watch.run(resume_path=PERSONA, state_path=self.state, runs_root=self.runs, judge=stub_judge,
+                      get=FakeGet(response(board_bytes(B))), now=self.clock, say=broken_screen)
+        self.assertEqual(self.state.read_bytes(), before)  # so error.txt's "the state was not changed" is true
+        self.assertIn("not changed", (self.run_dirs()[-1] / "error.txt").read_text(encoding="utf-8"))
+
+    def test_no_answer_from_the_board_saves_nothing(self):
+        def unreachable(url):
+            raise OSError("network is unreachable")
+
+        with self.assertRaises(NoAnswer):
+            watch.run(resume_path=PERSONA, state_path=self.state, runs_root=self.runs, get=unreachable,
+                      now=self.clock, say=self.screen.append)
+        self.assertEqual(self.run_dirs(), [])
+        self.assertFalse(self.state.exists())
+
+    def test_one_screen_line_per_new_posting_and_the_report_starts_with_the_counts_line(self):
+        self.run_once(board_bytes(A), judge=None)
+        self.screen.clear()
+        self.run_once(board_bytes(B))
+        self.assertEqual(len(self.screen), 2)  # the counts line, then one line for b-4; gone postings are in the report
+        self.assertTrue(self.screen[1].startswith("NEW b-4 "))
+        first = (self.run_dirs()[-1] / "report.md").read_text(encoding="utf-8").splitlines()[0]
+        self.assertTrue(first.startswith("Run ") and "new since the last run" in first)
+
+    def test_a_replay_never_records_an_absolute_path(self):
+        saved = self.dir / "elsewhere" / "response.json"
+        saved.parent.mkdir()
+        saved.write_bytes(board_bytes(A))
+        summary = watch.run(resume_path=PERSONA, state_path=self.dir / "r" / "s.json", runs_root=self.dir / "r",
+                            replay=saved, now=self.clock, say=self.screen.append, get=FakeGet())
+        self.assertNotIn(str(self.dir), summary["source"])
+        self.assertIn("(response.json)", summary["source"])
 
 
 if __name__ == "__main__":

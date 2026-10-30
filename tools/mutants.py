@@ -22,8 +22,9 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-# runs/: the rule's tests read the real baseline response; labels/ and tools/: the selection and label tests.
-COPIED = ("job_agent", "tests", "persona", "runs", "labels", "tools", "prompts")
+# runs/: the rule's tests read the real baseline response; labels/ and tools/: the selection and label tests;
+# experiment/: the Claude judge's tests copy Claude Code's real init event from a saved call.
+COPIED = ("job_agent", "tests", "persona", "runs", "labels", "tools", "prompts", "experiment")
 
 # (label, file, old text, new text)
 MUTANTS = [
@@ -59,6 +60,23 @@ MUTANTS = [
      '    return kept.replace("@", FULLWIDTH_AT)', "    return kept"),
     ("extra: the API key is passed on to the CLI", "job_agent/claude_judge.py",
      'PASSED_ON = ("HOME",', 'PASSED_ON = ("ANTHROPIC_API_KEY", "HOME",'),
+    ("extra: the sentence limit is not checked", "job_agent/claude_judge.py",
+     "    elif sentence_count(justification) > MAX_SENTENCES:", "    elif False:"),
+    ("extra: a key may appear twice", "job_agent/claude_judge.py",
+     "answer = json.loads(text, object_pairs_hook=_each_key_once)", "answer = json.loads(text)"),
+    ("extra: an installed plugin is trusted", "job_agent/claude_judge.py",
+     "    if unknown:\n        return f\"Claude Code loaded {len(unknown)} plugin(s)",
+     "    if False:\n        return f\"Claude Code loaded {len(unknown)} plugin(s)"),
+    ("extra: the input-token count is not checked", "job_agent/claude_judge.py",
+     "    if tokens > chars_sent / 4 + OVERHEAD_TOKENS:", "    if False:"),
+    ("extra: the state is saved before the screen is printed", "job_agent/watch.py",
+     "    say(line)  # before the state is saved, so that a screen that fails cannot leave a saved state behind an error\n",
+     "    state_mod.save(state_path, state_mod.next_state(previous, jobs, record))\n    say(line)\n"),
+    ("extra: the rule reads a singular 'year'", "job_agent/rule.py",
+     "\\s*years(?![a-z])\"", "\\s*years?(?![a-z])\""),
+    ("extra: a replay records its path as given", "job_agent/watch.py",
+     "f\"replay of a saved response ({_shown_path(replay)}), not a live run\"",
+     "f\"replay of a saved response ({Path(replay)}), not a live run\""),
     ("extra: redirects are followed", "job_agent/fetch.py",
      "urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirects())",
      "urllib.request.build_opener(urllib.request.ProxyHandler({}))"),

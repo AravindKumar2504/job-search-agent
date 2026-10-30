@@ -25,17 +25,28 @@ GOOD = {"verdict": "relevant", "justification": "Software engineering in San Fra
         "quotes": ["You have 2+ years of experience with distributed systems."]}
 
 
+# The init event exactly as Claude Code 2.1.309 sent it on the first live call (experiment/check/), so a test that
+# passes here passes against the real shape, including the fields the CLI added (plugins, agents, skills, ...).
+REAL_INIT = next(e for e in json.loads(next((REPO / "experiment" / "check").glob("*.json")).read_text(encoding="utf-8"))
+                 ["events"] if e.get("type") == "system" and e.get("subtype") == "init")
+REAL_USAGE = {"input_tokens": 2, "cache_creation_input_tokens": 366, "cache_read_input_tokens": 4000, "output_tokens": 300}
+
+
 def events(answer_text, folder, *, init=None, model="claude-sonnet-5-5", turns=1, subtype="success", blocks=None,
-           denials=None, rate_limit=False):
-    first = {"type": "system", "subtype": "init", "tools": [], "mcp_servers": [], "memory_paths": [], "cwd": folder,
-             "apiKeySource": "none", "permissionMode": "dontAsk", "model": model, "claude_code_version": "2.1.309"}
+           denials=None, rate_limit=False, usage=REAL_USAGE, drop=()):
+    first = dict(REAL_INIT, cwd=folder, model=model)
     first.update(init or {})
+    for key in drop:
+        first.pop(key, None)
     lines = [first]
     if rate_limit:
         lines.append({"type": "rate_limit_event", "rate_limit_info": {"status": "allowed"}})
     lines.append({"type": "assistant", "message": {"model": model, "content": blocks or [{"type": "text", "text": answer_text}]}})
-    lines.append({"type": "result", "subtype": subtype, "is_error": subtype != "success", "num_turns": turns,
-                  "result": answer_text, "total_cost_usd": 0.004, "permission_denials": denials or []})
+    result = {"type": "result", "subtype": subtype, "is_error": subtype != "success", "num_turns": turns,
+              "result": answer_text, "total_cost_usd": 0.004, "permission_denials": denials or []}
+    if usage is not None:
+        result["usage"] = usage
+    lines.append(result)
     return ("\n".join(json.dumps(e) for e in lines) + "\n").encode("utf-8")
 
 
@@ -109,6 +120,9 @@ class ClaudeJudgeTest(unittest.TestCase):
         sent = cj.build_request(POSTING, JANE)["data"]
         answer, problems = cj.validate(json.dumps(GOOD), sent)
         self.assertEqual(problems, [])
+        three = dict(GOOD, justification="It has no U.S. person requirement. The title fits, e.g. Software Engineer. "
+                                         "It asks 2 years.")
+        self.assertEqual(cj.validate(json.dumps(three), sent)[1], [])  # "U.S." and "e.g." end no sentence
         loose = dict(GOOD, quotes=["You have 2+ years   of experience\nwith distributed systems."])
         self.assertEqual(cj.validate(json.dumps(loose), sent)[1], [])  # runs of whitespace collapse
 
@@ -126,6 +140,9 @@ class ClaudeJudgeTest(unittest.TestCase):
             "a long justification": json.dumps(dict(GOOD, justification="x" * 601)),
             "too many quotes": json.dumps(dict(GOOD, quotes=["Build backend services in Go."] * 4)),
             "an invented quote": json.dumps(dict(GOOD, quotes=["5+ years of experience required"])),
+            "a key twice": json.dumps(GOOD)[:-1] + ', "verdict": "not_relevant"}',
+            "four sentences": json.dumps(dict(GOOD, justification="It is full-time. It is in California. "
+                                                                  "The title fits. It asks 2 years.")),
         }
         for name, text in bad.items():
             with self.subTest(name):
@@ -161,12 +178,25 @@ class ClaudeJudgeTest(unittest.TestCase):
             "a refused permission": FakeCLI(denials=[{"tool_name": "Bash"}]),
             "a failed exit": FakeCLI(exit_code=1),
             "a timeout": FakeCLI(timed_out=True),
+            "a skill": FakeCLI(init={"skills": ["deploy"]}),
+            "a slash command": FakeCLI(init={"slash_commands": ["review"]}),
+            "an installed plugin": FakeCLI(init={"plugins": REAL_INIT["plugins"] + [{"name": "x", "path": "/p/x"}]}),
+            "no plugin list": FakeCLI(drop=("plugins",)),
+            "no skills list": FakeCLI(drop=("skills",)),
+            "memory files": FakeCLI(init={"memory_paths": ["~/.claude/CLAUDE.md"]}),
+            "more input than was sent": FakeCLI(usage=dict(REAL_USAGE, cache_read_input_tokens=40000)),
+            "no token count": FakeCLI(usage=None),
         }
         for name, cli in cases.items():
             with self.subTest(name):
                 verdict = self.judge(cli)
                 self.assertFalse(verdict["valid"])
                 self.assertIn("the call failed", verdict["reason"])
+
+    def test_the_real_init_event_passes_the_lockdown_check(self):
+        folder = str(self.dir)
+        self.assertIsNone(cj._loaded(dict(REAL_INIT, cwd=folder), folder))
+        self.assertEqual(sorted(p["name"] for p in REAL_INIT["plugins"]), sorted(cj.KNOWN_PLUGINS))
 
     def test_a_cli_that_cannot_be_run_is_no_valid_judgment_not_a_crash(self):
         verdict = cj.judge(POSTING, JANE, prompt_path=PROMPT, record_dir=self.dir / "claude",

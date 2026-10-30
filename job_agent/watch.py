@@ -15,7 +15,9 @@ from . import CONTRACT_VERSION, board, evidence, fetch, report
 from . import resume as resume_mod
 from . import state as state_mod
 from .allowlist import BOARD_URL
-from .errors import BrokenInput
+from .errors import BrokenInput, NoAnswer
+
+REPO = Path(__file__).resolve().parent.parent
 
 
 def run(*, resume_path: Path, state_path: Path, runs_root: Path, judge=None, replay: Path = None,
@@ -27,9 +29,12 @@ def run(*, resume_path: Path, state_path: Path, runs_root: Path, judge=None, rep
     started = now() if now else datetime.now(timezone.utc)
     run_id = evidence.run_id_for(started)
     if replay is None:
-        response, source = get(BOARD_URL), "live fetch"
+        try:
+            response, source = get(BOARD_URL), "live fetch"
+        except OSError as exc:
+            raise NoAnswer(f"no answer from the board ({type(exc).__name__}: {exc})") from None
     else:
-        response, source = _replayed(Path(replay)), f"replay of a saved response ({Path(replay)}), not a live run"
+        response, source = _replayed(Path(replay)), f"replay of a saved response ({_shown_path(replay)}), not a live run"
     run_dir = evidence.new_run_dir(runs_root, run_id)
     digest = evidence.save_response(run_dir, response, source)  # kept even when the answer is broken
     try:
@@ -74,11 +79,20 @@ def _finish(run_dir, run_id, started, source, digest, response, resume, previous
         "counts_line": line,
     }
     report.write(run_dir, summary, found, verdicts)
-    state_mod.save(state_path, state_mod.next_state(previous, jobs, record))
-    say(line)
+    say(line)  # before the state is saved, so that a screen that fails cannot leave a saved state behind an error
     for text in report.screen_lines(found, verdicts):
         say(text)
+    state_mod.save(state_path, state_mod.next_state(previous, jobs, record))  # the last step of a run
     return summary
+
+
+def _shown_path(path) -> str:
+    """A path as the evidence names it: relative to the repo when inside it, else only its file name."""
+    resolved = Path(path).resolve()
+    try:
+        return str(resolved.relative_to(REPO))
+    except ValueError:
+        return resolved.name
 
 
 def _replayed(path: Path) -> fetch.Response:

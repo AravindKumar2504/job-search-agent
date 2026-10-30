@@ -35,17 +35,13 @@ def locations(job: dict) -> str:
 
 
 def screen_lines(diff, verdicts: dict) -> list:
+    """One line per new posting (CONTRACT.md, Out); gone postings are listed in the report."""
     lines = []
     for job in diff.new:
         v = verdicts.get(job["id"], {})
         rule = v.get("rule", {}).get("verdict", "?")
-        claude = v.get("claude", {})
-        said = claude.get("verdict") or "no valid judgment"
-        lines.append(f"NEW {job['id']}  {job['title']}  [{locations(job)}]")
-        lines.append(f"    {RULE_LABEL}: {rule}")
-        lines.append(f"    {CLAUDE_LABEL}: {said}")
-    for posting_id, title in diff.gone:
-        lines.append(f"GONE {posting_id}  {title}")
+        said = v.get("claude", {}).get("verdict") or "no valid judgment"
+        lines.append(f"NEW {job['id']} {job['title']} [{locations(job)}] | {RULE_LABEL}: {rule} | {CLAUDE_LABEL}: {said}")
     return lines
 
 
@@ -68,7 +64,7 @@ def write(run_dir: Path, summary: dict, diff, verdicts: dict) -> None:
 
 
 def _markdown(data: dict) -> str:
-    out = [f"# Run {data['run_id']}", "", data["counts_line"], ""]
+    out = [data["counts_line"], "", f"# Run {data['run_id']}", ""]  # the report starts with its counts line
     out += [
         f"- Board: {data['board_url']}",
         f"- Source: {data['source']}",

@@ -124,7 +124,7 @@ class EachCheckTest(unittest.TestCase):
     def test_7_years(self):
         passing = {"2-4 years of experience with Go.": 2, "1-3 years of experience, or 5+ years for senior scope.": 1,
                    "Three years of experience in backend systems.": 3, "3 to 5 years of experience.": 3,
-                   "1 year of experience is enough.": 1, "0–1 years of experience.": 0}
+                   "0–1 years of experience.": 0}
         for text, n in passing.items():
             with self.subTest(text):
                 result = self.assertRelevant(posting(text=text))
@@ -136,7 +136,8 @@ class EachCheckTest(unittest.TestCase):
 
     def test_7_silence_and_years_outside_experience_sentences_pass(self):
         for text in ("Build backend services.", "We have grown 10x in 2 years. You will build services.",
-                     "10+ years in the industry is a plus."):
+                     "10+ years in the industry is a plus.", "1 year of experience is enough.",
+                     "A 4 year degree or equivalent experience."):  # "years" only, as the contract writes it
             with self.subTest(text):
                 result = self.assertRelevant(posting(text=text))
         self.assertIn("states no years", result["checks"][6]["because"])

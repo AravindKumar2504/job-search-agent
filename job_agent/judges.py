@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from . import claude_judge, rule
+from .errors import BrokenInput
 
 PROMPTS = Path(__file__).resolve().parent.parent / "prompts"
 
@@ -13,6 +14,8 @@ class Judges:
     def __init__(self, prompt: Path = PROMPTS / "baseline.txt", model: str = claude_judge.DEFAULT_MODEL,
                  runner=claude_judge.run_cli, binary=None):
         self.prompt, self.model, self.runner, self.binary = Path(prompt), model, runner, binary
+        if not self.prompt.is_file():  # checked before anything is fetched
+            raise BrokenInput(f"the prompt file {self.prompt.name} does not exist")
 
     def __call__(self, job: dict, resume: dict, run_dir: Path) -> dict:
         return {

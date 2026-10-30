@@ -8,8 +8,9 @@ How the contract's words are read here, in the order the checks use them:
 - A "word" (checks 3 and 4) is a whole word: no letter or digit right before or after it.
 - "contains" (checks 4, 5 and 6) is plain containment, so "U.S. citizens" contains "U.S. citizen".
 - Phrases are matched after runs of whitespace are collapsed to one space.
-- Sentences (checks 5, 6 and 7) are split at ". ", "! ", "? " and line breaks, as the contract says.
-- Check 7 also reads "1 year" (singular) as one year.
+- Sentences (checks 5, 6 and 7) are split at ". ", "! ", "? " and line breaks, as the contract says. So a month
+  written "Jan. 2027" is split from its year, and "U.S. export control" starts a new sentence at "export".
+- Check 7 reads "years" only, as the contract writes it: "1 year" and "a 4 year degree" are not read.
 """
 
 from __future__ import annotations
@@ -35,7 +36,7 @@ NUMBER_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, 
 _NUM = r"(?:\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten)"
 # "N years", "N+ years", "N-M years" (hyphen or en dash), "N to M years", "N or more years".
 YEARS = re.compile(
-    rf"(?<![\w.])(?P<n>{_NUM})(?:\s*\+|\s*[-–]\s*{_NUM}\s*\+?|\s+to\s+{_NUM}|\s+or\s+more)?\s*years?(?![a-z])",
+    rf"(?<![\w.])(?P<n>{_NUM})(?:\s*\+|\s*[-–]\s*{_NUM}\s*\+?|\s+to\s+{_NUM}|\s+or\s+more)?\s*years(?![a-z])",
     re.IGNORECASE)
 _MONTH_YEAR = re.compile(r"(?<![a-z])(" + "|".join(sorted(MONTHS, key=len, reverse=True)) + r")\.?,?\s+(\d{4})(?!\d)",
                          re.IGNORECASE)
@@ -121,9 +122,9 @@ def check_level(job, resume):
     found = [w for w in LEVEL_WORDS if _has_word(title, w)]
     if found:
         return _cite(False, "title", title, "experience.full_time_years", have,
-                     f"Posting title {_q(title)} contains the level word {_q(found[0])} (the level words are fixed "
-                     f"in CONTRACT.md, check 3); the résumé field behind this check is experience.full_time_years "
-                     f"{_q(have)}.")
+                     f"Posting title {_q(title)} contains the level word {_q(found[0])}. The level words are fixed "
+                     f"in CONTRACT.md, check 3, so no résumé value is compared; the résumé field behind the check "
+                     f"is experience.full_time_years {_q(have)}.")
     return _cite(True, "title", title, "experience.full_time_years", have,
                  f"Posting title {_q(title)} contains none of the level words (CONTRACT.md, check 3); résumé "
                  f"experience.full_time_years is {_q(have)}.")

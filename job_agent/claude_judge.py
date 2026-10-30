@@ -6,9 +6,11 @@ locked down the way Klaxon's adapter does it (credited in SOURCES.md):
 - No tools (--tools ""), no MCP servers (--strict-mcp-config with an empty list), no skills, none of this Mac's
   customizations (--safe-mode) and no user, project or local settings (--restricted), nobody asked for
   permission (dontAsk, --permission-prompts none), and no transcript kept (--no-session-persistence).
-- Its first event, the CLI's own account of what it loaded, must show no tools, no MCP servers, no memory files,
-  the empty temporary folder this call made, the seat's login (apiKeySource "none") and dontAsk. The reply must be
-  one turn with no tool use. Anything else makes the call fail: the verdict is "no valid judgment".
+- Its first event, the CLI's own account of what it loaded, must list no tools, no MCP servers, no skills and no
+  slash commands, only the CLI's known built-in plugins, the empty temporary folder this call made, the seat's login
+  (apiKeySource "none") and dontAsk. That event does not list memory files (CLI 2.1.309), so the input-token count
+  is checked instead: more than the characters sent explain means something else was loaded. The reply must be one
+  turn with no tool use. Anything else makes the call fail: the verdict is "no valid judgment".
 - It runs in a new empty temporary folder with a small environment (no API key, no API address, no proxy).
 - The data goes in on stdin inside a tag made from the data's own hash. Every "@" is sent as a fullwidth one,
   because Claude Code attaches files named in "@path" mentions. Hidden characters are dropped.
@@ -42,6 +44,11 @@ ANSWER_KEYS = ("verdict", "justification", "resume_fields", "posting_fields", "q
 VERDICTS = ("relevant", "not_relevant")
 MAX_JUSTIFICATION = 600
 MAX_QUOTES = 3
+MAX_SENTENCES = 3
+# Claude Code adds about 2,000 tokens of its own to a call: measured on the 66 calls of 2026-10-30, 1,866 to 2,313
+# above one token per four characters sent. A context the size of a memory file would pass this allowance.
+OVERHEAD_TOKENS = 3_500
+KNOWN_PLUGINS = ("cc-plugin-sec-default", "cc-plugin-agents-md", "cc-plugin-plugin-authoring")  # built into 2.1.309
 FULLWIDTH_AT = "＠"
 SEAT = "none"  # the init event's apiKeySource when the CLI uses a claude.ai login, not an API key
 PERMISSION_MODE = "dontAsk"
@@ -164,7 +171,7 @@ def _kill_group(proc) -> None:
         pass
 
 
-def read_reply(raw: dict, folder: str) -> dict:
+def read_reply(raw: dict, folder: str, chars_sent: int) -> dict:
     """Check the CLI's own events and return the reply text and model, or raise CallFailed with the reason."""
     if raw["timed_out"]:
         raise CallFailed(f"no reply within {TIMEOUT_SECONDS} s; Claude Code was stopped")
@@ -202,6 +209,12 @@ def read_reply(raw: dict, folder: str) -> dict:
         raise CallFailed("Claude Code was refused a permission: something tried to run")
     if raw["exit_code"] != 0:
         raise CallFailed(f"Claude Code exited with code {raw['exit_code']}")
+    usage = result.get("usage")
+    if not isinstance(usage, dict) or not isinstance(usage.get("input_tokens"), int):
+        raise CallFailed("Claude Code did not report how many input tokens the call read")
+    tokens = sum(usage.get(k) or 0 for k in ("input_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"))
+    if tokens > chars_sent / 4 + OVERHEAD_TOKENS:
+        raise CallFailed(f"the call read {tokens} input tokens, more than the {chars_sent} characters sent explain")
     text = result.get("result")
     if not isinstance(text, str):
         raise CallFailed("Claude Code's result has no text")
@@ -219,6 +232,17 @@ def _loaded(init: dict, folder: str):
         return f"Claude Code loaded {len(tools)} tool(s)"
     if servers:
         return f"Claude Code loaded {len(servers)} MCP server(s)"
+    for key in ("skills", "slash_commands"):
+        if not isinstance(init.get(key), list):
+            return f"Claude Code did not say which {key.replace('_', ' ')} it loaded"
+        if init[key]:
+            return f"Claude Code loaded {len(init[key])} {key.replace('_', ' ')}"
+    plugins = init.get("plugins")
+    if not isinstance(plugins, list):
+        return "Claude Code did not say which plugins it loaded"
+    unknown = [p for p in plugins if not (isinstance(p, dict) and p.get("path") == "builtin" and p.get("name") in KNOWN_PLUGINS)]
+    if unknown:
+        return f"Claude Code loaded {len(unknown)} plugin(s) other than its known built-in ones"
     if any(isinstance(p, str) and p.strip() for p in init.get("memory_paths") or []):
         return "Claude Code loaded memory files"
     if os.path.realpath(cwd) != os.path.realpath(folder):
@@ -235,9 +259,9 @@ def _loaded(init: dict, folder: str):
 def validate(text: str, sent: dict) -> tuple:
     """(answer, problems): the answer object, and every reason it breaks the fixed format. Valid when no problems."""
     try:
-        answer = json.loads(text)
+        answer = json.loads(text, object_pairs_hook=_each_key_once)
     except (TypeError, ValueError):
-        return None, ["the answer is not one JSON object"]
+        return None, ["the answer is not one JSON object with each key once"]
     if not isinstance(answer, dict):
         return None, ["the answer is not one JSON object"]
     problems = []
@@ -252,6 +276,8 @@ def validate(text: str, sent: dict) -> tuple:
         problems.append("justification is empty")
     elif len(justification) > MAX_JUSTIFICATION:
         problems.append(f"justification is over {MAX_JUSTIFICATION} characters")
+    elif sentence_count(justification) > MAX_SENTENCES:
+        problems.append(f"justification has more than {MAX_SENTENCES} sentences")
     allowed = {"resume_fields": resume_mod.field_paths(sent["resume"]),
                "posting_fields": set(POSTING_FIELDS) | resume_mod.field_paths(sent["posting"])}
     for key in ("resume_fields", "posting_fields"):
@@ -272,6 +298,22 @@ def validate(text: str, sent: dict) -> tuple:
                 problems.append("a quote does not appear word for word in the posting sent")
                 break
     return answer, problems
+
+
+def _each_key_once(pairs):
+    keys = [key for key, _ in pairs]
+    if len(keys) != len(set(keys)):
+        raise ValueError("a key appears twice")
+    return dict(pairs)
+
+
+# A sentence ends at ".", "!" or "?" (or one followed by a closing quote) before a space and a capital letter, a
+# quote or a parenthesis, but not after an initialism such as "U.S." or after "e.g." or "i.e.".
+_SENTENCE_END = re.compile(r'(?:(?<![.\s][A-Z]\.)(?<!\be\.g\.)(?<!\bi\.e\.)(?<=[.!?])|(?<=[.!?]["\u201d]))\s+(?=[A-Z"(\u201c])')
+
+
+def sentence_count(text: str) -> int:
+    return len([piece for piece in _SENTENCE_END.split(text.strip()) if piece.strip()])
 
 
 def _strings(value):
@@ -314,9 +356,9 @@ def judge(job: dict, resume: dict, *, prompt_path: Path, record_dir: Path, model
             record["environment"] = sorted(environment(binary))
             raw = runner(argv, request["user"].encode("utf-8"), folder, environment(binary))
             record.update(exit_code=raw["exit_code"], seconds=raw["seconds"], timed_out=raw["timed_out"],
-                          stderr_tail=raw["stderr"].decode("utf-8", "replace")[-1500:])
+                          stderr_tail=_tilde(raw["stderr"].decode("utf-8", "replace")[-1500:]))
             record["events"] = _for_the_record(raw["stdout"])
-            reply = read_reply(raw, folder)
+            reply = read_reply(raw, folder, len(system) + len(request["user"]))
         record.update(answer_text=reply["text"], model=reply["model"],
                       claude_code=_init_summary(reply["init"]), cost_usd=reply["result"].get("total_cost_usd"))
         answer, problems = validate(reply["text"], request["data"])
