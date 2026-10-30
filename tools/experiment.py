@@ -53,7 +53,7 @@ def sample(times: int, model: str) -> int:
     jobs, labels, jane = load()
     folder = EXPERIMENT / "sampling"
     if folder.exists():
-        print(f"refused: {folder.relative_to(REPO)} exists; saved calls are never replaced")
+        print(f"refused: experiment/{folder.name} exists; saved calls are never replaced")
         return 3
     for item in sampling_postings(jobs, labels, jane):
         print(f"posting {item['n']}: {item['title']}")
@@ -69,7 +69,7 @@ def run(prompt: Path, part: str, model: str) -> int:
     prompt = prompt if prompt.is_absolute() else (REPO / prompt)
     folder = EXPERIMENT / f"{prompt.stem}-{part}"
     if folder.exists():
-        print(f"refused: {folder.relative_to(REPO)} exists; each prompt runs on each set once")
+        print(f"refused: experiment/{folder.name} exists; each prompt runs on each set once")
         return 3
     if part == "held_out":
         developed = sorted(p.name[: -len("-development")] for p in EXPERIMENT.glob("*-development"))
