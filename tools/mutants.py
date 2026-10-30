@@ -22,7 +22,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-COPIED = ("job_agent", "tests", "persona")
+COPIED = ("job_agent", "tests", "persona", "runs")  # runs/: the rule's tests read the real baseline response
 
 # (label, file, old text, new text)
 MUTANTS = [
@@ -30,6 +30,8 @@ MUTANTS = [
      "    found = state_mod.diff(previous, jobs)\n",
      "    state_mod.save(state_path, state_mod.next_state(previous, jobs, record))\n"
      "    found = state_mod.diff(state_mod.load(state_path), jobs)\n"),
+    ("W2 any 'sponsor' blocks", "job_agent/rule.py",
+     'SPONSORSHIP_PHRASES = ("unable to sponsor",', 'SPONSORSHIP_PHRASES = ("sponsor", "unable to sponsor",'),
     ("W3 look-alike host passes (substring)", "job_agent/allowlist.py",
      "    if host not in ALLOWED_HOSTS:", "    if not any(allowed in host for allowed in ALLOWED_HOSTS):"),
     ("W3 look-alike host passes (prefix)", "job_agent/allowlist.py",
@@ -57,6 +59,21 @@ MUTANTS = [
      'not re.fullmatch(r"[^@\\s]+@example\\.com", email)', 'not re.search(r"@example\\.com", email)'),
     ("extra: Claude gets the contact fields", "job_agent/resume.py",
      "if key not in CONTACT_FIELDS}", 'if key != "name"}'),
+    ("extra: the rule takes the largest number of years", "job_agent/rule.py",
+     "    n, quote = min(found, key=lambda pair: pair[0])", "    n, quote = max(found, key=lambda pair: pair[0])"),
+    ("extra: a posting that states no years fails", "job_agent/rule.py",
+     "    if not found:\n        return _cite(True,", "    if not found:\n        return _cite(False,"),
+    ("extra: team names after the comma trip the role check", "job_agent/rule.py",
+     "    part = role_part(title)", "    part = title"),
+    ("extra: level words match inside longer words", "job_agent/rule.py",
+     "    found = [w for w in LEVEL_WORDS if _has_word(title, w)]",
+     "    found = [w for w in LEVEL_WORDS if w.lower() in title.lower()]"),
+    ("extra: a listed city counts outside the United States", "job_agent/rule.py",
+     '        if country.lower() == "united states" and city.lower() in cities:', "        if city.lower() in cities:"),
+    ("extra: the export-control 'may need' sentence blocks", "job_agent/rule.py",
+     'US_PERSON_PHRASES = ("U.S. person",', 'US_PERSON_PHRASES = ("export control", "U.S. person",'),
+    ("extra: U.S.-person phrases are skipped", "job_agent/rule.py",
+     '    if auth["us_person"] is False:', "    if False:"),
 ]
 
 
