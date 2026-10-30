@@ -22,6 +22,11 @@ A posting is `relevant` only if all three of these hold.
 - I label from `labels/SHEET.md`: for each posting, its title, locations, employment type, link, and its own text down to "About OpenAI" (the company boilerplate below that line is left out, except any line with a status, start-date or export-control phrase, which is shown).
 - Each posting is labeled once. The labels are committed before any Claude call. A label changed later would be a new commit with its reason, and the experiment would report both.
 
+## After labeling (added 2026-10-30)
+
+- For the ten postings the rule rejects, I confirmed my labels in one answer, against the rule's record (the check that failed), so their agreement with every judge is by construction. The experiment report says so and scores the other ten separately.
+- I relabeled posting 11 from relevant to not relevant after the Claude calls, when an independent review pointed out that its required lines are the same kind of specialty I used for postings 1 and 4. The first label stays in `labels/labels.json` and in commit 882909e, and the experiment reports both.
+
 ## Where these choices come from
 
 - **Decided on 2026-10-30:** labels use the contract's seven checks plus seniority in words; a must-have specialty Jane lacks makes a posting not relevant, and only must-haves count; the 20 postings are engineering titles, 10 the rule calls relevant and 10 it does not, seed 7375, 5 + 5 in each of the development and held-out sets.

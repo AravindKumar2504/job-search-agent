@@ -1,11 +1,11 @@
 # Action-surface comparison
 
-The same task, done three ways on 2026-10-30, each with more autonomy than the last: judge one posting (the contract's worked example, `55150071-fce8-48f5-aea4-14ed78b83511`, "Software Engineer, Applied Emerging Talent (2027)") for Jane, and record which posting ids were seen. All three used Claude Code 2.1.309 on my claude.ai seat (no API key), the model `claude-sonnet-5-5`, the system prompt `prompts/baseline.txt`, no MCP servers, no settings or memory, no saved session, and the `dontAsk` permission mode. Every run's own record is linked below; each says what Claude Code reported it had loaded.
+The same task, done three ways on 2026-10-30, each with more autonomy than the last: judge one posting (the contract's worked example, `55150071-fce8-48f5-aea4-14ed78b83511`, "Software Engineer, Applied Emerging Talent (2027)") for Jane, and record which posting ids were seen. All three used Claude Code 2.1.309 on my claude.ai seat (no API key), the model `claude-sonnet-5-5`, the system prompt `prompts/baseline.txt`, and the judge's lockdown flags: no MCP servers, no user or project settings, no saved session, the `dontAsk` permission mode. Claude Code's own init event, saved in each run's record (linked below), confirms no MCP servers, no skills and no slash commands, and lists three built-in plugins; it does not report memory files.
 
 | | 1. Paste the posting into a chat | 2. Give Claude a file to read | 3. Let an agent fetch and write its own state |
 |---|---|---|---|
 | How it ran | The agent's own Claude judge: the posting's six fields and the résumé without contact fields, pasted on stdin; `--tools ""` | `--tools Read`, in a new empty folder holding `posting.json` and `resume.json` | `--tools WebFetch,Write`, WebFetch allowed only for `api.ashbyhq.com`, Write in a new empty folder |
-| Can read | Only the text pasted to it | Any file in its working folder (file tools are confined to it by `--restricted`) | Any address on the allowed host, with any path and query it picks; the files it writes |
+| Can read | Only the text pasted to it | Any file in its working folder (the CLI's help says `--restricted` confines file tools to it; not tested here) | Any address on the allowed host, with any path and query it picks; the files it writes |
 | Can write | Nothing | Nothing | Files in its working folder |
 | Can send | Its answer | Its answer | Requests to `api.ashbyhq.com` that it composes; its answer |
 | Authority it needs | The seat's login | The login, plus read access to a folder | The login, plus the network and write access to a folder |

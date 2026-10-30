@@ -9,7 +9,8 @@ The same holds for the rest: every decision is mine and is logged with its commi
 ## What Claude Code did, specifically
 
 - Before the contract: fetched the board once with `curl` (not kept) to count postings for the options it offered me, and checked every "sponsor", "citizen", "export" and "ITAR" phrase on it.
-- Wrote the agent (`job_agent/`), its 92 tests, the 30 planted mistakes in `tools/mutants.py`, and the other tools.
+- Wrote the agent (`job_agent/`), its 99 tests, the 37 planted mistakes in `tools/mutants.py`, and the other tools.
+- Ran an independent review at my request, on 2026-10-30 before anything was public: a separate Claude Code agent, reading only the repo and the brief, reported 15 issues. The main ones were my account name in three commits, a validator that did not check the contract's three-sentence limit, a lockdown check that could never fire on this CLI version, an error path that could write a false note, and wording that claimed more than the evidence. All were fixed or written up, and the commits that fixed them say so.
 - Wrote Jane Doe's résumé to match the contract's fields.
 - Ran the Friday baseline at my word, and every Claude call in `experiment/` (68 on 2026-10-30).
 - Prepared the labeling excerpts. While doing so it read the held-out postings and my held-out labels, before any Claude judge call; the experiment report says so.

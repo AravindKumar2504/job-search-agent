@@ -17,12 +17,12 @@ One public job board, one fictional résumé, new postings only, and every verdi
 ```bash
 python3 -m unittest discover -s tests -t .
 ```
-92 offline tests. No network and no Claude: a stand-in plays the CLI, and the tests point the real one at a path that does not exist.
+99 offline tests. No network and no Claude: a stand-in plays the CLI, and the tests point the real one at a path that does not exist.
 
 ```bash
 python3 tools/mutants.py
 ```
-Plants 30 mistakes in a copy of the code, one at a time, including the contract's four wrong versions (W1 to W4), and checks that the tests catch every one.
+Plants 37 mistakes in a copy of the code, one at a time, including the contract's four wrong versions (W1 to W4), and checks that the tests catch every one.
 
 ```bash
 python3 -m job_agent check-resume
@@ -47,20 +47,41 @@ Shows that the 20 labeled postings are exactly what the seeded selection rule gi
 ```bash
 python3 tools/experiment.py report
 ```
-Rebuilds the sampling report and the experiment report from the saved Claude calls, offline.
+Rebuilds the sampling report and the experiment report from the saved Claude calls, offline, scoring every saved reply with the contract's validator.
+
+The saved calls in `experiment/` came from these commands, run once each on 2026-10-30. They call Claude live, and the experiment tool refuses to run a set twice, so nothing above needs them:
+
+```text
+python3 tools/claude_check.py
+python3 tools/experiment.py sample --times 5
+python3 tools/experiment.py run prompts/baseline.txt development
+python3 tools/experiment.py run prompts/revision-specialty.txt development
+python3 tools/experiment.py run prompts/baseline.txt held_out
+python3 tools/experiment.py run prompts/revision-specialty.txt held_out
+python3 tools/action_surfaces.py file
+python3 tools/action_surfaces.py agent
+```
 
 ## What ran
 
-- **Baseline, Friday 2026-10-30 02:31 PT** (09:31Z): `runs/2026-10-30T093102Z/`, 814 postings recorded, 0 new.
+- **Baseline, Friday 2026-10-30 5:31 AM ET** (09:31Z): `runs/2026-10-30T093102Z/`, 814 postings recorded, 0 new.
 - **Run 2, Saturday 2026-10-31:** not run yet; I run it myself.
 - **Claude calls on 2026-10-30 (68):** a lockdown check (`experiment/check/`); the sampling report, 5 postings x 5 fresh calls (`experiment/sampling/`); the prompt experiment, 2 prompts x 10 development postings, then the same 2 prompts once on the 10 held-out postings; the action-surface runs (`experiment/surfaces/`).
 
 ## Results
 
 - **The rule** on the baseline board: 95 of 814 postings relevant for Jane.
-- **Sampling** ([experiment/SAMPLING.md](experiment/SAMPLING.md)): four of five postings got the same verdict on all five tries, two of them unanimously against my label; the variation that did appear was in the format (three replies held a second, "corrected" answer, and the validator rejected them).
-- **Prompt experiment** ([experiment/EXPERIMENT.md](experiment/EXPERIMENT.md)): development set, baseline 8/10, revision 10/10; held-out set, baseline 10/10, revision 9/10; rule 8/10 and 9/10; majority class 7/10 and 6/10. Ten cases cannot separate these prompts; the agent keeps the baseline, my contract's checks.
+- **Sampling** ([experiment/SAMPLING.md](experiment/SAMPLING.md)): repeated verdicts were repeatable, not right: postings 1 and 4 got "relevant" on every valid try, and I labeled both not relevant. On posting 5 the verdict flipped inside three broken replies, each holding a "not_relevant" answer and then a "corrected" "relevant" one; the validator rejected them.
+- **Prompt experiment** ([experiment/EXPERIMENT.md](experiment/EXPERIMENT.md)), scored with the contract's validator and my current labels: development set, baseline 8/10, revision 10/10; held-out set, baseline 8/10, revision 9/10; rule 8/10 on both; majority class 7/10 on both. The revision's held-out edge rests on one posting I relabeled after seeing the results, and the report shows every other scoring. Ten cases cannot separate these prompts.
 - **Action surfaces** ([ACTION-SURFACE.md](ACTION-SURFACE.md)): pasted text (the agent's design), a file to read, and an agent with fetch and write tools, which could not read the 13.5 MB board and still gave a verdict.
+
+## Known limits of the rule
+
+- Check 7 reads years only in sentences that contain "experience", so "5+ years in one or more of: ML systems..." is skipped; 2 of the 95 rule-relevant postings on the baseline board ask for years that way.
+- Check 7 takes the contract's patterns literally: "up to 5 years" reads as 5, "three-to-five years" as 5, and "2.5+ years", "1 year" and months are not read.
+- Check 6 never fired on the baseline board. Its sentence split separates a month written "Jan. 2027" from its year.
+- Locations count only through a US address's region or city, or an exact remote string from Jane's list.
+- The privacy scan recognizes US phone formats only.
 
 ## Contents
 
