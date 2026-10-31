@@ -1,6 +1,6 @@
 # My decisions for JS1
 
-Every choice below was mine, made in the Claude Code app on 2026-10-30 (Eastern time), most of them as multiple-choice picks among options Claude Code laid out. Times are approximate. The commit that applied each one is named, so the split between what I decided and what Claude Code did can be checked in the history. Conversation transcripts stay on my machine, as the brief asks; this log is the record instead.
+Every choice below was mine, made in the Claude Code app on 2026-10-30 and 2026-10-31 (Eastern time), most of them as multiple-choice picks among options Claude Code laid out. Times are approximate. The commit that applied each one is named, so the split between what I decided and what Claude Code did can be checked in the history. Conversation transcripts stay on my machine, as the brief asks; this log is the record instead.
 
 | When (ET) | Decision | Applied in |
 |---|---|---|
@@ -18,3 +18,6 @@ Every choice below was mine, made in the Claude Code app on 2026-10-30 (Eastern 
 | 07:00 | An independent review of the whole repo before anything is public. | 5ab508d |
 | 07:25 | Rewrite the three commits that held my account name, before the first push; keep my contract's wording; relabel posting 11 as a missing specialty and report both scorings. | history before 5ab508d, c254ab9 |
 | 07:40 | After the rescoring, keep the baseline prompt: it is my contract's seven checks, and ten cases cannot separate it from the revision. The specialty point waits for a contract v0.2. | README.md |
+| 10/31 19:10 | I ran live run 2 myself. | runs/2026-10-31T231042Z |
+| 10/31 19:12 | I ran the 99 tests, the 37 planted mistakes and the independent recompute myself. | README.md, sign-off |
+| 10/31 19:15 | My sign-off: four "not checked" items, way 1 as the least autonomy that suffices, signed. Publishing: commit, my public repo, the course PR, the zip. | README.md, ACTION-SURFACE.md |

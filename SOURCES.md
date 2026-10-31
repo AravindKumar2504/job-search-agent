@@ -12,7 +12,7 @@ The same holds for the rest: every decision is mine and is logged with its commi
 - Wrote the agent (`job_agent/`), its 99 tests, the 37 planted mistakes in `tools/mutants.py`, and the other tools.
 - Ran an independent review at my request, on 2026-10-30 before anything was public: a separate Claude Code agent, reading only the repo and the brief, reported 15 issues. The main ones were my account name in three commits, a validator that did not check the contract's three-sentence limit, a lockdown check that could never fire on this CLI version, an error path that could write a false note, and wording that claimed more than the evidence. All were fixed or written up, and the commits that fixed them say so.
 - Wrote Jane Doe's résumé to match the contract's fields.
-- Ran the Friday baseline at my word, and every Claude call in `experiment/` (68 on 2026-10-30).
+- Ran the Friday baseline at my word, and every Claude call in `experiment/` (68 on 2026-10-30). I ran live run 2 myself on 2026-10-31; its 7 Claude calls are in `runs/2026-10-31T231042Z/claude/`.
 - Prepared the labeling excerpts. While doing so it read the held-out postings and my held-out labels, before any Claude judge call; the experiment report says so.
 - Drafted CONTRACT.md, LABELING-RULE.md, ACTION-SURFACE.md, the experiment reports' conclusions and this file from my decisions and the saved results, and organized my FRICTIONAL.md entries from my own messages, picks and commands each day, at my request.
 

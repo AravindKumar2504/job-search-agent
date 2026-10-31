@@ -29,3 +29,22 @@ My log for JS1. Claude Code organized each day's entry from my own messages, pic
 **Evidence:** commits e989f8b (the contract) to c254ab9 (the relabel) and the docs after them; the baseline in `runs/2026-10-30T093102Z/`; my labels in `labels/labels.json`; the experiment in `experiment/`.
 
 **Next:** run live run 2 myself on Saturday, then the sign-off.
+
+## Saturday 2026-10-31
+
+**What I was working on:** live run 2, my own checks, the sign-off and publishing.
+
+**What happened**
+- I ran live run 2 myself at 7:10 PM ET: 810 postings, 7 new and 11 gone since Friday. All seven new postings were senior, legal, management or non-software roles; the rule and Claude agreed that none fits Jane, and every Claude answer passed the validator.
+- I ran the 99 tests, the 37 planted mistakes and the independent recompute myself. All passed, and the recompute matched run 2's report (7 new, 11 gone): the check my contract's failure sentence asks for.
+
+**What I decided**
+- My sign-off's four "not checked" items, way 1 as the least autonomy that suffices, signing it, and publishing: my public repo, the course PR and the zip.
+
+**Looking back at Friday evening (logged on Saturday)**
+- I asked whether the finished agent would land me interviews, and what it does if it never applies. It cannot promise interviews; it controls the blockers, freshness, referral notes and what I learn from responses. My friend's kit does not submit applications either. I added an apply-assist step to my personal plan: my saved answers for the factual questions, drafts for the open ones, and I submit.
+
+**Evidence:** `runs/2026-10-31T231042Z/`; the sign-off and driver's seat at the end of README.md.
+
+**Next:** JS2 (due Tue 11/10), and the personal layer starting Sunday.
+

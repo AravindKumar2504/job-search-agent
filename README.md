@@ -65,12 +65,13 @@ python3 tools/action_surfaces.py agent
 ## What ran
 
 - **Baseline, Friday 2026-10-30 5:31 AM ET** (09:31Z): `runs/2026-10-30T093102Z/`, 814 postings recorded, 0 new.
-- **Run 2, Saturday 2026-10-31:** not run yet; I run it myself.
-- **Claude calls on 2026-10-30 (68):** a lockdown check (`experiment/check/`); the sampling report, 5 postings x 5 fresh calls (`experiment/sampling/`); the prompt experiment, 2 prompts x 10 development postings, then the same 2 prompts once on the 10 held-out postings; the action-surface runs (`experiment/surfaces/`).
+- **Run 2, Saturday 2026-10-31 7:10 PM ET** (23:10Z), which I ran myself: `runs/2026-10-31T231042Z/`, 810 postings, 7 new since Friday, 11 gone, 0 new and relevant by the rule or in Claude's judgment, and all 7 Claude judgments valid. `tools/recompute_new.py` on the two saved responses gives the same 7 new and 11 gone.
+- **Claude calls (75):** 7 in run 2 on 2026-10-31, and 68 on 2026-10-30: a lockdown check (`experiment/check/`); the sampling report, 5 postings x 5 fresh calls (`experiment/sampling/`); the prompt experiment, 2 prompts x 10 development postings, then the same 2 prompts once on the 10 held-out postings; the action-surface runs (`experiment/surfaces/`).
 
 ## Results
 
 - **The rule** on the baseline board: 95 of 814 postings relevant for Jane.
+- **Run 2:** the seven new postings (two Applied AI Delivery Leads, two counsel roles, a research program manager, a manufacturing quality engineer, a product growth role) are all senior, legal, management or non-software roles; the rule and Claude agree that none fits Jane.
 - **Sampling** ([experiment/SAMPLING.md](experiment/SAMPLING.md)): repeated verdicts were repeatable, not right: postings 1 and 4 got "relevant" on every valid try, and I labeled both not relevant. On posting 5 the verdict flipped inside three broken replies, each holding a "not_relevant" answer and then a "corrected" "relevant" one; the validator rejected them.
 - **Prompt experiment** ([experiment/EXPERIMENT.md](experiment/EXPERIMENT.md)), scored with the contract's validator and my current labels: development set, baseline 8/10, revision 10/10; held-out set, baseline 8/10, revision 9/10; rule 8/10 on both; majority class 7/10 on both. The revision's held-out edge rests on one posting I relabeled after seeing the results, and the report shows every other scoring. Ten cases cannot separate these prompts. The agent keeps the baseline prompt, my contract's seven checks; the specialty point waits for a contract v0.2.
 - **Action surfaces** ([ACTION-SURFACE.md](ACTION-SURFACE.md)): pasted text (the agent's design), a file to read, and an agent with fetch and write tools, which could not read the 13.5 MB board and still gave a verdict.
@@ -98,3 +99,38 @@ python3 tools/action_surfaces.py agent
 | `tools/` | The mutants, recomputation, selection, experiment, lockdown check and action-surface tools |
 | `tests/` | The offline tests |
 | `DECISIONS.md`, `SOURCES.md`, `FRICTIONAL.md` | My decisions, the sources and the split of work, my log |
+
+## Sign-off
+
+```text
+Sign-off: Job-Search Agent 1
+Checked:      new since the last run, by recomputation: tools/recompute_new.py on the two saved
+              responses gives the same 7 new and 11 gone as run 2's report (I ran it, 2026-10-31);
+              the contract's four wrong versions and 33 more planted mistakes are all caught
+              (python3 tools/mutants.py, 37 of 37, I ran it); the 99 offline tests pass (I ran them);
+              both judges against my 20 hand labels (experiment/EXPERIMENT.md).
+How:          by recomputation, for new and gone; by tests and planted mistakes that Claude Code wrote
+              against my contract and that I ran myself; by my own hand labels, the answer key;
+              with Claude's help for the code, the tests, the tools and the Claude calls.
+Not checked:  both judges' verdicts beyond my 20 labels (the other 790+ postings, run 2's 7 new ones);
+              any board other than OpenAI's on Ashby (Greenhouse, Lever and Workday are untested);
+              a posting that hides instructions for Claude, against the live judge;
+              the rule's wording gaps: years outside "experience" sentences (2 postings), a month
+              written "Jan. 2027", months and upper bounds.
+Not claiming: that the agent finds every relevant job; that Claude's judgments are right; that either
+              prompt is better (ten cases cannot show it); that results for a fictional persona
+              carry over to my own search.
+Signed:       Aravind Sundaravadivelu, 2026-10-31
+```
+
+## Driver's seat
+
+| Part of the task | What Claude did | What I did | Why it stays mine | Where the split shows |
+|---|---|---|---|---|
+| What counts as relevant | Laid out options with live counts; wrote CONTRACT.md's text | Chose the years rule, the titles, the four wrong versions and the failure sentence | It decides which jobs get my time | e989f8b; DECISIONS.md, 04:45 |
+| The answer key | Prepared the labeling sheet and excerpts | Labeled all 20 postings, and relabeled posting 11 | Claude cannot be graded against its own reading | 882909e, c254ab9 |
+| Which prompt the agent keeps | Ran the experiment and reported every scoring | Picked the one change, then kept the baseline | A choice about what to trust, on thin evidence | 2196c65; DECISIONS.md, 06:27 and 07:40 |
+| Code, tests and runs | Wrote and ran them | Ran the tests and the planted mistakes myself, and live run 2 | My name is on the result | 304c0a0; runs/2026-10-31T231042Z |
+| Applying and messaging | Never | Me, outside the agent | My name goes on every application | CONTRACT.md, Refuses 4 |
+| Publishing | Prepared the repo, the PR and the zip | Approved every push, the PR and the upload | It goes out under my name | DECISIONS.md, 10/31 19:15 |
+
