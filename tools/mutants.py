@@ -114,6 +114,50 @@ MUTANTS = [
      'US_PERSON_PHRASES = ("U.S. person",', 'US_PERSON_PHRASES = ("export control", "U.S. person",'),
     ("extra: U.S.-person phrases are skipped", "job_agent/rule.py",
      '    if auth["us_person"] is False:', "    if False:"),
+
+    # Layer 2: GATE.md's wrong versions 1, 2 and 4 (3, the path tricks, come with the boundary tests).
+    ("G1a a 404 board read as zero postings", "job_agent/providers.py",
+     '    if status != 200:\n        raise Unverified(f"the board answered HTTP {status}, not 200")\n',
+     '    if status == 404:\n        return []\n    if status != 200:\n'
+     '        raise Unverified(f"the board answered HTTP {status}, not 200")\n'),
+    ("G1b an empty jobs list read as zero postings", "job_agent/providers.py",
+     '    if not jobs:\n        raise Unverified("the board\'s jobs list is empty")\n', ""),
+    ("G1c a run with an unverified board reported finished", "job_agent/loop.py",
+     '    if any(b.status == "unverified" for b in boards):\n        return gate.INCOMPLETE\n', ""),
+    ("G2 a failed board's postings counted as gone", "job_agent/loop.py",
+     '        if board.status == "read":\n            board.diff = board_state.diff(board.previous, board.postings)\n',
+     '        if board.status in ("read", "unverified"):\n'
+     '            board.diff = board_state.diff(board.previous, board.postings or [])\n'),
+    ("G4a a retry not counted against the request budget", "job_agent/loop.py",
+     '        self.used += 1\n        self.sent[("GET", url)] = times + 1\n',
+     '        self.used += 0 if retry else 1\n        self.sent[("GET", url)] = times + 1\n'),
+    ("G4b the request budget checked after sending", "job_agent/loop.py",
+     '        if self.used >= self.limit:\n'
+     '            raise BudgetStop("requests", f"the request budget of {self.limit} was used up")\n'
+     '        self.used += 1\n        self.sent[("GET", url)] = times + 1\n        announce(self.used)\n'
+     '        return get(url, gate.REQUEST_TIMEOUT)\n',
+     '        self.used += 1\n        self.sent[("GET", url)] = times + 1\n        announce(self.used)\n'
+     '        answer = get(url, gate.REQUEST_TIMEOUT)\n        if self.used > self.limit:\n'
+     '            raise BudgetStop("requests", f"the request budget of {self.limit} was used up")\n'
+     '        return answer\n'),
+    ("G4c a command-line flag raises a budget", "job_agent/gate.py",
+     "            if value > limit:\n", "            if False:\n"),
+    ("extra: a 404 is retried", "job_agent/loop.py",
+     "        except Unverified as exc:\n",
+     "        except Unverified as exc:\n            if not retry:\n"
+     "                _wait_for_retry(board, trace, budgets, elapsed, ledger, sleep, str(exc))\n"
+     "                continue\n"),
+    ("extra: the repeat rule is not enforced", "job_agent/loop.py",
+     "        if times and not (retry and times == 1):\n", "        if False:\n"),
+    ("extra: an unverified board's state is written", "job_agent/loop.py",
+     '        if board.status != "read":\n            trace.add("state_write"',
+     '        if board.status == "not visited":\n            trace.add("state_write"'),
+    ("extra: a Lever posting's requirements in lists are not read", "job_agent/providers.py",
+     '            parts += [item.get("text"), html_text(item.get("content") or "")]\n', '            pass\n'),
+    ("extra: a redirect is followed as a transient failure", "job_agent/loop.py",
+     "            return _unverified(board, trace, str(exc))\n        saved = _save_answer(",
+     "            if not retry:\n                continue\n"
+     "            return _unverified(board, trace, str(exc))\n        saved = _save_answer("),
 ]
 
 
