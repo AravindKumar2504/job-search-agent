@@ -1,4 +1,4 @@
-"""The command line's exit codes: 0 done, 2 broken input, 3 refused. Offline: runs use --replay."""
+"""Layer 1's command line (run-one): exit 0 done, 2 broken input, 3 refused. Offline: runs use --replay."""
 
 import io
 import json
@@ -44,25 +44,25 @@ class CliTest(unittest.TestCase):
         self.assertIn("fictional", err)
 
     def test_a_replay_into_the_live_state_is_refused(self):
-        code, _, err = call("run", "--replay", str(self.saved))
+        code, _, err = call("run-one", "--replay", str(self.saved))
         self.assertEqual(code, 3)
         self.assertIn("own --state and --runs", err)
 
     def test_a_replay_runs_offline_into_its_own_folders(self):
-        code, out, _ = call("run", "--replay", str(self.saved), "--state", str(self.dir / "s.json"),
+        code, out, _ = call("run-one", "--replay", str(self.saved), "--state", str(self.dir / "s.json"),
                             "--runs", str(self.dir / "runs"))
         self.assertEqual(code, 0)
         self.assertIn("baseline: 2 postings recorded, 0 new", out)
 
     def test_a_broken_saved_response_exits_2(self):
         self.saved.write_bytes(b"not json")
-        code, _, err = call("run", "--replay", str(self.saved), "--state", str(self.dir / "s.json"),
+        code, _, err = call("run-one", "--replay", str(self.saved), "--state", str(self.dir / "s.json"),
                             "--runs", str(self.dir / "runs"))
         self.assertEqual(code, 2)
         self.assertIn("not JSON", err)
 
     def test_a_missing_prompt_file_stops_before_any_fetch_with_exit_2(self):
-        code, _, err = call("run", "--replay", str(self.saved), "--state", str(self.dir / "s.json"),
+        code, _, err = call("run-one", "--replay", str(self.saved), "--state", str(self.dir / "s.json"),
                             "--runs", str(self.dir / "runs"), "--prompt", str(self.dir / "no-such-prompt.txt"))
         self.assertEqual(code, 2)
         self.assertIn("prompt file", err)

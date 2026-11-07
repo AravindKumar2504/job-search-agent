@@ -12,7 +12,7 @@ PACKAGE = Path(__file__).resolve().parent.parent / "job_agent"
 NETWORK = {"urllib.request", "urllib.error", "http", "http.client", "http.server", "socket", "ssl", "smtplib",
            "ftplib", "imaplib", "poplib", "telnetlib", "xmlrpc", "webbrowser", "asyncio", "requests", "httpx",
            "urllib3", "aiohttp"}
-ALLOWED = {"fetch.py": {"urllib.request", "urllib.error"}}
+ALLOWED = {"fetch.py": {"urllib.request", "urllib.error", "http.client"}}  # http.client: to name a dropped answer
 STARTS_PROGRAMS = {"subprocess", "os.system", "pty"}
 MAY_START_PROGRAMS = {"claude_judge.py"}
 

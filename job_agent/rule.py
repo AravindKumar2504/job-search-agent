@@ -1,6 +1,9 @@
 """The written rule: seven checks, in order (CONTRACT.md, The rule). Its verdict is a record.
 
-Anyone can recompute it by hand from the saved response and the résumé. The first check that fails
+Anyone can recompute it by hand from the saved response and the résumé. Postings from Greenhouse and
+Lever arrive already mapped to these fields (providers.py, by GATE.md's table); GATE.md adds two
+readings here: a missing employment type passes check 1, and a Lever posting marked remote in the
+US fits check 2. The first check that fails
 decides "not_relevant" and is the one cited; a relevant posting cites all seven.
 
 How the contract's words are read here, in the order the checks use them:
@@ -76,6 +79,10 @@ def _verdict(verdict, checks, cautions, deciding):
 def check_employment_type(job, resume):
     wanted = resume["preferences"]["employment_types"]
     value = job.get("employmentType")
+    if value is None:  # GATE.md: a posting with no employment type passes, as one that states no years does
+        return _cite(True, "employmentType", None, "preferences.employment_types", wanted,
+                     f"Posting employmentType is not stated, which passes (GATE.md, not stated passes); résumé "
+                     f"preferences.employment_types is {_q(wanted)}.")
     passed = isinstance(value, str) and value.lower() in {w.lower() for w in wanted}
     return _cite(passed, "employmentType", value, "preferences.employment_types", wanted,
                  f"Posting employmentType is {_q(value)}; résumé preferences.employment_types is {_q(wanted)}.")
@@ -107,6 +114,11 @@ def check_location(job, resume):
             return _cite(True, field, text, "preferences.remote_locations", prefs["remote_locations"],
                          f"Posting {field} is {_q(text)}, which is one of résumé preferences.remote_locations "
                          f"{_q(prefs['remote_locations'])}.")
+    if job.get("_us_remote") is True:  # GATE.md: a Lever posting with workplaceType remote and country US
+        return _cite(True, "workplaceType, country", "remote, US", "preferences.remote_locations",
+                     prefs["remote_locations"],
+                     'Posting workplaceType is "remote" and its country is "US" (Lever), which GATE.md counts as a '
+                     f"US remote location, as in résumé preferences.remote_locations {_q(prefs['remote_locations'])}.")
     listed = "; ".join(f"{_q(text)}" for _, text, _ in places)
     return _cite(False, "location, secondaryLocations", listed,
                  "preferences.regions, preferences.cities, preferences.remote_locations",

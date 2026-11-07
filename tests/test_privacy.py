@@ -2,9 +2,12 @@
 
 Scans every file git would commit (or every file, in a copy without .git, such as the Canvas zip)
 and fails on an email address that does not end in @example.com (GitHub noreply addresses aside)
-or a phone number outside 555-0100 to 555-0199.
+or a phone number outside 555-0100 to 555-0199. Saved board answers are gzip-compressed, so the
+scan reads inside .gz files too. A company's own public address printed in its job postings may
+appear in saved answers and test fixtures only, and only if it is listed below.
 """
 
+import gzip
 import os
 import re
 import subprocess
@@ -17,6 +20,10 @@ REPO = Path(__file__).resolve().parent.parent
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 PHONE = re.compile(r"(?<![\d-])(?:\+?1[ .-]?)?\(?\d{3}\)?[ .-]?\d{3}[ .-]\d{4}(?![\d-])")
 ALLOWED_EMAIL_ENDINGS = ("@example.com", "@users.noreply.github.com")
+# Public addresses printed in a company's own postings (not anyone's personal contact), allowed only in
+# saved board answers (runs/) and test fixtures (tests/fixtures/). Each one is added by a reviewed commit.
+PUBLIC_BOARD_ADDRESSES = {"accommodations" + "@" + "palantir.com"}  # split so this file does not hold it
+PUBLIC_BOARD_FOLDERS = ("runs/", "tests/fixtures/")
 SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "scratch", "tmp"}
 
 
@@ -38,11 +45,15 @@ class PrivacyScanTest(unittest.TestCase):
         found = []
         for path in repo_files():
             try:
-                text = path.read_text(encoding="utf-8")
-            except (UnicodeDecodeError, OSError):
+                raw = path.read_bytes()
+                text = (gzip.decompress(raw) if path.suffix == ".gz" else raw).decode("utf-8")
+            except (UnicodeDecodeError, OSError, EOFError):
                 continue
             rel = path.relative_to(REPO)
+            public_ok = rel.as_posix().startswith(PUBLIC_BOARD_FOLDERS)
             for address in EMAIL.findall(text):
+                if public_ok and address.lower() in PUBLIC_BOARD_ADDRESSES:
+                    continue
                 if not address.lower().endswith(ALLOWED_EMAIL_ENDINGS):
                     found.append(f"{rel}: an email address not on example.com")
             for number in PHONE.findall(text):

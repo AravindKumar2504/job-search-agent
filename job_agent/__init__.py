@@ -1,7 +1,8 @@
-"""Job-Search Agent, layer 1 (INFO 7375 JS1): one board, one résumé, new postings only.
+"""Job-Search Agent (INFO 7375): layer 1 (JS1) watches one board; layer 2 (JS2) loops over several.
 
-CONTRACT.md is the specification. Every module names the contract section it implements.
+CONTRACT.md specifies the watch and the rule; GATE.md specifies the loop, its budgets and its
+permission policy. Every module names the section it implements.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 CONTRACT_VERSION = "0.1"

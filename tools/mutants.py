@@ -25,6 +25,7 @@ REPO = Path(__file__).resolve().parent.parent
 # runs/: the rule's tests read the real baseline response; labels/ and tools/: the selection and label tests;
 # experiment/: the Claude judge's tests copy Claude Code's real init event from a saved call.
 COPIED = ("job_agent", "tests", "persona", "runs", "labels", "tools", "prompts", "experiment")
+COPIED_FILES = ("GATE.md", "boards.json")  # tests/test_gate.py compares the code's numbers with GATE.md
 
 # (label, file, old text, new text)
 MUTANTS = [
@@ -130,6 +131,8 @@ def main() -> int:
     try:
         for item in COPIED:
             shutil.copytree(REPO / item, work / item, ignore=shutil.ignore_patterns("__pycache__"))
+        for item in COPIED_FILES:
+            shutil.copy2(REPO / item, work / item)
         for label, file, old, new in MUTANTS:
             text = (work / file).read_text(encoding="utf-8")
             if text.count(old) != 1:

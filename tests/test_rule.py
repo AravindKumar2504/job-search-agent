@@ -45,7 +45,7 @@ class EachCheckTest(unittest.TestCase):
 
     def test_1_employment_type(self):
         self.assertDecided(posting(employmentType="Contract"), 1)
-        self.assertDecided(posting(employmentType=None), 1)
+        self.assertRelevant(posting(employmentType=None))  # not stated passes (GATE.md v1.0; contract v0.1 failed it)
         self.assertRelevant(posting(employmentType="fulltime"))  # matching ignores case
 
     def test_2_location(self):
