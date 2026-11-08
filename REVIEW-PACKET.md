@@ -71,13 +71,13 @@ I ran it on 2026-11-08 at 5:45 PM ET, before any patch existed: `FAILED (failure
 
 Measured on the 2026-10-30 baseline after the patch: 95 relevant become 93, and check 7 decides 50 postings instead of 48. The two flips are posting 19 and "Software Engineer, Data Infrastructure". My test passes, and so do all 202 tests on Python 3.12 and 3.9.
 
-**My reading of the diff as a change in behavior (mine):** to come
+**My reading of the diff as a change in behavior (mine):** Before, check 7 only read years in sentences containing "experience." Now, it reads every sentence containing numbers and years, skipping only specific exclusions like "N years ago" or "the next N years," which means even unrelated sentences like company history are read.
 
 ## 7. Scope
 
 **Facts:** the reading changed only inside check 7; checks 1 to 6 have no changed line. Beyond `rule.py`, the patch touched JS1's experiment and selection tools only to pin them to v0.1, and JS1's tests to say which contract each one checks. v0.2 also reads two sentences that are not requirements, and the v0.2 test pins both: "10+ years in the industry is a plus." now blocks for Jane, and "We have grown 10x in 2 years." is read as 2 years, which Jane has.
 
-**My judgment of the scope (mine):** to come
+**My judgment of the scope (mine):** Yes, the change stayed strictly in check 7 with version plumbing keeping JS1 evidence tied to v0.1. I accept the risk that bonus statements like "10+ years in the industry is a plus" make the rule stricter because across all four saved boards, the change flipped only the two real requirements and caused zero false drops from bonus lines.
 
 **The "OR" in the Data Infrastructure posting (checked after my `--flips` run):** its line ends with "OR", and the next line is the alternative: "- Have 4+ years in infrastructure engineering with a strong interest in data". Both paths ask for 4+ years, so the flip holds either way. Both lines sit under "You might thrive in this role if you:", which the rule reads as requirements in v0.1 and v0.2 alike.
 
@@ -94,6 +94,12 @@ All in my own terminal on 2026-11-08 (ET), with their output logged in MY-CHECKS
 | 6:02 PM | `python3 tools/mutants.py` | 61 of 61 planted mistakes caught, including the 3 for the new reading |
 | 6:24 PM | `git --no-pager show 4b1a418 -- job_agent/rule.py CONTRACT.md` | the diff of check 7 and the contract, printed in full |
 
-## 9. My decision (accept, revise or reject) and the evidence: to come
+## 9. My decision (accept, revise or reject) and the evidence
 
-## 10. One case my test would still miss: to come
+**Mine:** Accept. My evidence is clear: the tests went from 4 of 5 failing to 5 of 5 passing after the patch, exactly two postings flipped and both were correct (including the "OR" requirement), and all 61 planted mistakes across the suite were successfully caught.
+
+## 10. One case my test would still miss
+
+**Mine:** A common case it still misses is when words break up the expected phrasing, such as "a minimum of 5 calendar years" or abbreviations like "5+ yrs" and "Five-plus years."
+
+Checked by Claude Code on 2026-11-08 with `rule.years_asked`, which reads no years in "A minimum of 5 calendar years in backend.", "5+ yrs in backend." or "Five-plus years in backend.", and reads 5 in "5 or more years of backend work.", a wording the pattern lists by name.
