@@ -41,7 +41,19 @@ The same two OpenAI postings flip under B, C and D: posting 19, and "Software En
 
 **My pick (2026-11-08, multiple choice, after seeing this table): E**, every sentence that states years, except "N years ago" and "the next N years". Claude Code laid out A to E and recommended E.
 
-## 5. My test, written before the patch: to come
+## 5. My test, written before the patch
+
+`tests/test_years_v02.py`, drafted by Claude Code from my pick E, five tests on real sentences from my saved answers:
+
+| Test | Line or posting | Must give |
+|---|---|---|
+| posting 19's requirement is read | "- 5+ years in one or more of: ML systems, ..." | 5 years |
+| a Greenhouse requirement without the word "experience" is read | Verkada: "2+ years productionizing modern LLMs, VLMs, or agentic systems ..." | 2 years |
+| years ago is not a requirement | Palantir: "... PCL team was formed 15+ years ago ..." | nothing |
+| the next N years is not a requirement | Verkada: "... help us 5x the business over the next 3 years." | nothing |
+| both OpenAI postings are no longer relevant for Jane | posting 19 and "Software Engineer, Data Infrastructure" | not_relevant, decided by check 7 |
+
+I ran it on 2026-11-08 at 5:45 PM ET, before any patch existed: `FAILED (failures=4)`. The two tests that say a wording is not a requirement passed, as they must before and after the patch.
 
 ## 6. The patch, and the diff read as a change in behavior: to come
 
