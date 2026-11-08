@@ -91,6 +91,7 @@ All in my own terminal on 2026-11-08 (ET), with their output logged in MY-CHECKS
 | 5:45 PM | `python3 -m unittest tests.test_years_v02` (before the patch) | FAILED (failures=4) |
 | 6:00 PM | `python3 -m unittest tests.test_years_v02` (after the patch) | OK, 5 of 5 |
 | 6:01 PM | `python3 tools/rule_verdicts.py runs/2026-10-30T093102Z/response.json --flips` | 2 flips: Data Infrastructure (N = 4) and Workload Enablement (N = 5), relevant to not_relevant |
+| 6:02 PM | `python3 tools/mutants.py` | 61 of 61 planted mistakes caught, including the 3 for the new reading |
 
 ## 9. My decision (accept, revise or reject) and the evidence: to come
 
