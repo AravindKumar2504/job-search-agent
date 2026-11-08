@@ -135,12 +135,26 @@ class EachCheckTest(unittest.TestCase):
                 self.assertDecided(posting(text=text), 7)
 
     def test_7_silence_and_years_outside_experience_sentences_pass(self):
+        # Contract v0.1's reading, kept for JS1's experiment and seeded selection (contract="0.1").
         for text in ("Build backend services.", "We have grown 10x in 2 years. You will build services.",
                      "10+ years in the industry is a plus.", "1 year of experience is enough.",
                      "A 4 year degree or equivalent experience."):  # "years" only, as the contract writes it
             with self.subTest(text):
-                result = self.assertRelevant(posting(text=text))
+                result = rule.judge(posting(text=text), JANE, contract="0.1")
+                self.assertEqual(result["verdict"], "relevant", result["lines"])
         self.assertIn("states no years", result["checks"][6]["because"])
+
+    def test_7_v02_reads_years_in_every_sentence_except_ago_and_next(self):
+        # Contract v0.2 (2026-11-08). These pin what the new reading does, including what it gets wrong.
+        self.assertDecided(posting(text="10+ years in the industry is a plus."), 7)  # a plus, read as a requirement
+        grown = verdict(posting(text="We have grown 10x in 2 years. You will build services."))
+        self.assertEqual(grown["verdict"], "relevant")
+        self.assertIn("N = 2", grown["checks"][6]["because"])  # company history read as 2 years; Jane has 3
+        for text in ("Build backend services.", "The team was formed 15+ years ago.",
+                     "Help us grow the business over the next 5 years.", "1 year of experience is enough.",
+                     "A 4 year degree or equivalent experience."):
+            with self.subTest(text):
+                self.assertIn("states no years", verdict(posting(text=text))["checks"][6]["because"])
 
 
 class VerdictShapeTest(unittest.TestCase):
@@ -168,6 +182,7 @@ class RealBoardTest(unittest.TestCase):
     def setUpClass(cls):
         cls.jobs = json.loads(BASELINE.read_bytes())["jobs"]
         cls.verdicts = {j["id"]: rule.judge(j, JANE) for j in cls.jobs}
+        cls.verdicts_v01 = {j["id"]: rule.judge(j, JANE, contract="0.1") for j in cls.jobs}
 
     def test_the_contracts_worked_example(self):
         result = self.verdicts["55150071-fce8-48f5-aea4-14ed78b83511"]
@@ -179,11 +194,17 @@ class RealBoardTest(unittest.TestCase):
         self.assertIn('"Software Engineer"', result["checks"][3]["because"])
 
     def test_the_whole_board_gives_the_same_counts_as_when_the_rule_was_chosen(self):
-        # 95 relevant of 814 is the count shown when the years and title choices were made.
-        decided = collections.Counter(v["deciding_check"] for v in self.verdicts.values())
+        # 95 relevant of 814 is the count shown when the years and title choices were made (contract v0.1).
+        decided = collections.Counter(v["deciding_check"] for v in self.verdicts_v01.values())
         self.assertEqual(len(self.jobs), 814)
         self.assertEqual(decided[None], 95)
         self.assertEqual(dict(decided), {None: 95, 1: 1, 2: 196, 3: 239, 4: 234, 5: 1, 7: 48})
+
+    def test_contract_v02_flips_exactly_two_postings_on_the_baseline(self):
+        flipped = sorted(i for i in self.verdicts if self.verdicts[i]["verdict"] != self.verdicts_v01[i]["verdict"])
+        self.assertEqual(flipped, ["9efcef02-0515-4672-bace-81329944b38b", "f763c6b3-5167-4a67-b691-4c3fa2c44156"])
+        decided = collections.Counter(v["deciding_check"] for v in self.verdicts.values())
+        self.assertEqual(dict(decided), {None: 93, 1: 1, 2: 196, 3: 239, 4: 234, 5: 1, 7: 50})
 
     def test_no_real_sponsor_sentence_blocks(self):
         sponsored = [j for j in self.jobs if "sponsor" in (j.get("descriptionPlain") or "").lower()]

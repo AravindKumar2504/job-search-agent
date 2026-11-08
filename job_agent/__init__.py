@@ -5,4 +5,4 @@ permission policy. Every module names the section it implements.
 """
 
 __version__ = "0.2.0"
-CONTRACT_VERSION = "0.1"
+CONTRACT_VERSION = "0.2"

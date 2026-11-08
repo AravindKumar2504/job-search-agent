@@ -97,7 +97,8 @@ def load():
 
 
 def sampling_postings(jobs, labels, jane):
-    return [l for l in labels if l["set"] == "development" and rule.judge(jobs[l["id"]], jane)["verdict"] == "relevant"]
+    # JS1's experiment ran with contract v0.1's rule; its reports keep that reading.
+    return [l for l in labels if l["set"] == "development" and rule.judge(jobs[l["id"]], jane, contract="0.1")["verdict"] == "relevant"]
 
 
 def call(posting, jane, prompt: Path, folder: Path, label: str, model: str):
@@ -262,7 +263,7 @@ def experiment_report(jobs, labels, jane) -> str:
         for folder in sorted(EXPERIMENT.glob(f"*-{part}")):
             runs[(folder.name[: -len(f"-{part}")], part)] = records(folder)
     prompts = sorted({stem for stem, _ in runs}, key=lambda s: (s != "baseline", s))
-    verdict_of = {l["id"]: rule.judge(jobs[l["id"]], jane)["verdict"] for l in labels}
+    verdict_of = {l["id"]: rule.judge(jobs[l["id"]], jane, contract="0.1")["verdict"] for l in labels}  # JS1 ran v0.1
 
     def score(stem, part, strict, first, only=None):
         mine = [l for l in labels if l["set"] == part and (only is None or l["id"] in only)]

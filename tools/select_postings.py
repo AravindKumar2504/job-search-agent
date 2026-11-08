@@ -36,7 +36,7 @@ def select():
     jobs = json.loads(raw.decode("utf-8"))["jobs"]
     jane = resume_mod.load(REPO / PERSONA)
     pool = [j for j in jobs if "engineer" in j["title"].lower()]
-    verdict = {j["id"]: rule.judge(j, jane)["verdict"] for j in pool}
+    verdict = {j["id"]: rule.judge(j, jane, contract="0.1")["verdict"] for j in pool}  # JS1's selection used v0.1
     relevant = sorted((j for j in pool if verdict[j["id"]] == "relevant"), key=lambda j: j["id"])
     other = sorted((j for j in pool if verdict[j["id"]] != "relevant"), key=lambda j: j["id"])
     rng = random.Random(SEED)

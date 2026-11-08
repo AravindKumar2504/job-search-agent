@@ -3,6 +3,7 @@
 Usage (from the repo root):
   python3 tools/rule_verdicts.py <saved answer> --save <file.json>     the verdicts now, saved
   python3 tools/rule_verdicts.py <saved answer> --compare <file.json>  every posting whose verdict differs
+  python3 tools/rule_verdicts.py <saved answer> --flips                contract v0.1 against v0.2, posting by posting
 <saved answer> is read as in tools/explain_rule.py. The résumé is Jane Doe's.
 """
 
@@ -30,8 +31,26 @@ def verdicts(answer: Path) -> dict:
     return out
 
 
+def flips(answer: Path) -> list:
+    jane = resume.load(REPO / "persona" / "jane-doe.json")
+    _, postings = load(answer)
+    out = []
+    for p in postings:
+        old, new = rule.judge(p, jane, contract="0.1"), rule.judge(p, jane, contract="0.2")
+        if old["verdict"] != new["verdict"]:
+            out.append((p, old, new))
+    return out
+
+
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
+    if len(args) == 2 and args[1] == "--flips":
+        changed = flips(Path(args[0]))
+        print(f"{len(changed)} verdicts differ between contract v0.1 and v0.2")
+        for p, old, new in changed:
+            print(f"- {p['title']} ({p['id']}): {old['verdict']} -> {new['verdict']}; check 7 now: "
+                  f"{new['checks'][-1]['because']}")
+        return 0
     if len(args) != 3 or args[1] not in ("--save", "--compare"):
         print("usage: python3 tools/rule_verdicts.py <saved answer> --save|--compare <file.json>")
         return 2

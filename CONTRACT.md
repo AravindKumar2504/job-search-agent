@@ -1,6 +1,6 @@
 # Contract: Job-Search Agent 1 (the contract and the watch)
 
-Version 0.1, 2026-10-30. Written before any code. The decisions behind it are listed at the end.
+Version 0.2, 2026-11-08: check 7 reads years in every sentence (JS2's review packet). Version 0.1, 2026-10-30, was written before any code. The decisions behind both are listed at the end.
 
 The agent watches one public job board and remembers which postings it has seen. For each posting that is new since the last run, it gives two verdicts on whether the posting is worth a fictional persona's time: one from the written rule below (a record anyone can recompute) and one from Claude (a judgment, labeled as one).
 
@@ -76,7 +76,7 @@ A posting is `relevant` only if it passes all seven checks, taken in this order.
 
    The word "sponsor" alone does not block ("executive technical sponsor"), and neither does "ITAR" alone (on this board it appears only as a skill, "ITAR/EAR"). A sentence containing "export control" that has none of the phrases above does not block either. If the posting is relevant, that sentence is shown as a quoted caution, for example "candidates for this role may need to meet certain legal status requirements".
 6. **Start date.** `descriptionPlain` does not ask for a start before résumé `availability.earliest_full_time_start`: it contains none of "start immediately", "immediate start", "available immediately", "start ASAP", "start as soon as possible", and no sentence with the word "start" names a month and year earlier than that résumé date (May 2027 for Jane). A posting that says nothing about dates passes.
-7. **Years of experience.** In `descriptionPlain`, look only at sentences (split at ". ", "! ", "? " and line breaks) that contain "experience", also inside a longer word such as "experienced". In them, find each number of years written as "N years", "N+ years", "N-M years" (hyphen or en dash), "N to M years" or "N or more years", with N in digits or as a word from one to ten. Take the smallest N found. The posting passes if N is at most résumé `experience.full_time_years`, or if no such sentence states years at all: stating no years is not a requirement. Upper bounds and months are not read.
+7. **Years of experience.** In `descriptionPlain`, look at every sentence (split at ". ", "! ", "? " and line breaks). In each, find every number of years written as "N years", "N+ years", "N-M years" (hyphen or en dash), "N to M years" or "N or more years", with N in digits or as a word from one to ten. A number of years followed by "ago" ("formed 15+ years ago") or preceded by "next" ("over the next 3 years") is not a requirement and is not read. Take the smallest N found. The posting passes if N is at most résumé `experience.full_time_years`, or if no sentence states years at all: stating no years is not a requirement. Upper bounds and months are not read. (Version 0.1 read only sentences that contain "experience", and so missed "5+ years in one or more of: ML systems, ..." in posting 19.)
 
 **Worked example.** A real posting on the board on 2026-10-30, id `55150071-fce8-48f5-aea4-14ed78b83511`, "Software Engineer, Applied Emerging Talent (2027)":
 
@@ -104,6 +104,8 @@ Each one is a planted bug. The tests apply it to a copy of the code, and the tes
 2026-10-30: If Saturday's run lists as new any posting id already in Friday's saved response, or leaves out one that is not, this layer has failed.
 
 ## Where these choices come from
+
+- **Decided on 2026-11-08, for version 0.2 (JS2 review packet), after a measured table of five readings:** check 7 reads years in every sentence, except "N years ago" and "the next N years" (option E). The readings and counts are in REVIEW-PACKET.md.
 
 - **Decided on 2026-10-30, after checking how many of the board's 814 postings each option keeps:** the years rule (Jane has 3 years of work before her master's; up to 3 years passes, and a posting that states no years passes), the title lists (software engineering), all four wrong versions, and the failure sentence.
 - **Decided earlier on 2026-10-30:** the board (OpenAI on Ashby, over Databricks after comparing both boards' counts); the persona Jane Doe, who is fictional and has my situation (F-1 student, not a U.S. person, needs H-1B sponsorship later, earliest full-time start May 2027, backend new grad, my locations) but none of my identity; Python standard library only; Claude through the Claude Code CLI with no API key.

@@ -13,12 +13,16 @@ How the contract's words are read here, in the order the checks use them:
 - Phrases are matched after runs of whitespace are collapsed to one space.
 - Sentences (checks 5, 6 and 7) are split at ". ", "! ", "? " and line breaks, as the contract says. So a month
   written "Jan. 2027" is split from its year, and "U.S. export control" starts a new sentence at "export".
-- Check 7 reads "years" only, as the contract writes it: "1 year" and "a 4 year degree" are not read.
+- Check 7 reads "years" only, as the contract writes it: "1 year" and "a 4 year degree" are not read. Since
+  contract v0.2 it reads years in every sentence, not only in sentences with "experience", except "N years
+  ago" and "the next N years".
 """
 
 from __future__ import annotations
 
 import re
+
+from . import CONTRACT_VERSION
 
 LEVEL_WORDS = ("Senior", "Sr", "Staff", "Principal", "Lead", "Manager", "Director", "Head", "Distinguished",
                "Fellow", "VP", "Chief", "Architect", "Intern", "Internship")
@@ -49,11 +53,15 @@ CHECK_NAMES = {1: "employment type", 2: "location", 3: "level", 4: "role", 5: "s
                7: "years of experience"}
 
 
-def judge(job: dict, resume: dict) -> dict:
-    """The rule's verdict on one posting, with the citations the contract's Out section asks for."""
+def judge(job: dict, resume: dict, contract: str = CONTRACT_VERSION) -> dict:
+    """The rule's verdict on one posting, with the citations the contract's Out section asks for.
+
+    `contract` picks check 7's reading of years: "0.2" (the agent's) or "0.1" (kept for JS1's experiment and
+    seeded selection, which were made with it). Checks 1 to 6 are the same in both.
+    """
     checks, cautions = [], []
     for number, check in enumerate(CHECKS, start=1):
-        result = check(job, resume)
+        result = check_years(job, resume, contract) if check is check_years else check(job, resume)
         result.update(number=number, name=CHECK_NAMES[number])
         checks.append(result)
         if not result["passed"]:
@@ -211,9 +219,9 @@ def check_start_date(job, resume):
                  f"{_q(earliest)}.")
 
 
-def check_years(job, resume):
+def check_years(job, resume, contract=CONTRACT_VERSION):
     have = resume["experience"]["full_time_years"]
-    found = years_asked(job.get("descriptionPlain") or "")
+    found = years_asked(job.get("descriptionPlain") or "", contract)
     if not found:
         return _cite(True, "descriptionPlain", None, "experience.full_time_years", have,
                      "Posting descriptionPlain states no years of experience, which is not a requirement; "
@@ -241,16 +249,27 @@ def sentences(text: str) -> list:
     return [s for s in re.split(r"(?<=[.!?]) |\r\n|\r|\n", text) if s.strip()]
 
 
-def years_asked(text: str) -> list:
-    """(N, sentence) for every number of years in a sentence that contains "experience"."""
+def years_asked(text: str, contract: str = CONTRACT_VERSION) -> list:
+    """(N, sentence) for every number of years the contract reads.
+
+    v0.2: every sentence, except "N years ago" and "the next N years", which describe the past or a plan, not a
+    requirement. v0.1: only sentences that contain "experience" (it missed posting 19's "5+ years in ...").
+    """
     found = []
     for sentence in sentences(text):
-        if "experience" not in sentence.lower():
+        if contract == "0.1" and "experience" not in sentence.lower():
             continue
         for match in YEARS.finditer(sentence):
+            if contract != "0.1" and (_NOT_A_REQUIREMENT_AFTER.match(sentence[match.end():]) or
+                                      _NOT_A_REQUIREMENT_BEFORE.search(sentence[:match.start()])):
+                continue
             word = match.group("n").lower()
             found.append((int(word) if word.isdigit() else NUMBER_WORDS[word], _flat(sentence).strip()))
     return found
+
+
+_NOT_A_REQUIREMENT_AFTER = re.compile(r"\s+ago\b", re.IGNORECASE)  # "formed 15+ years ago"
+_NOT_A_REQUIREMENT_BEFORE = re.compile(r"\bnext\s+$", re.IGNORECASE)  # "over the next 3 years"
 
 
 def _has_word(text: str, word: str) -> bool:
