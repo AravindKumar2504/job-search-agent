@@ -79,6 +79,8 @@ Measured on the 2026-10-30 baseline after the patch: 95 relevant become 93, and 
 
 **My judgment of the scope (mine):** to come
 
+**The "OR" in the Data Infrastructure posting (checked after my `--flips` run):** its line ends with "OR", and the next line is the alternative: "- Have 4+ years in infrastructure engineering with a strong interest in data". Both paths ask for 4+ years, so the flip holds either way. Both lines sit under "You might thrive in this role if you:", which the rule reads as requirements in v0.1 and v0.2 alike.
+
 ## 8. Commands I ran myself
 
 All in my own terminal on 2026-11-08 (ET), with their output logged in MY-CHECKS.md:
@@ -88,6 +90,7 @@ All in my own terminal on 2026-11-08 (ET), with their output logged in MY-CHECKS
 | 5:24 PM | `python3 tools/explain_rule.py runs/2026-10-30T093102Z/response.json 9efcef02-0515-4672-bace-81329944b38b` | the bug: relevant, check 7 "states no years" |
 | 5:45 PM | `python3 -m unittest tests.test_years_v02` (before the patch) | FAILED (failures=4) |
 | 6:00 PM | `python3 -m unittest tests.test_years_v02` (after the patch) | OK, 5 of 5 |
+| 6:01 PM | `python3 tools/rule_verdicts.py runs/2026-10-30T093102Z/response.json --flips` | 2 flips: Data Infrastructure (N = 4) and Workload Enablement (N = 5), relevant to not_relevant |
 
 ## 9. My decision (accept, revise or reject) and the evidence: to come
 
