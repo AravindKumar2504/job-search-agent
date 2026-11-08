@@ -77,7 +77,7 @@ Measured on the 2026-10-30 baseline after the patch: 95 relevant become 93, and 
 
 **Facts:** the reading changed only inside check 7; checks 1 to 6 have no changed line. Beyond `rule.py`, the patch touched JS1's experiment and selection tools only to pin them to v0.1, and JS1's tests to say which contract each one checks. v0.2 also reads two sentences that are not requirements, and the v0.2 test pins both: "10+ years in the industry is a plus." now blocks for Jane, and "We have grown 10x in 2 years." is read as 2 years, which Jane has.
 
-**My judgment of the scope (mine):** Yes, the change stayed strictly in check 7 with version plumbing keeping JS1 evidence tied to v0.1. I accept the risk that bonus statements like "10+ years in the industry is a plus" make the rule stricter because across all four saved boards, the change flipped only the two real requirements and caused zero false drops from bonus lines.
+**My judgment of the scope (mine):** Yes, the change stayed strictly in check 7 with version plumbing keeping JS1 evidence tied to v0.1. I accept the risk that bonus statements like "10+ years in the industry is a plus" make the rule stricter because across all four saved answers from three boards, the change flipped only the two real requirements and caused zero false drops from bonus lines.
 
 **The "OR" in the Data Infrastructure posting (checked after my `--flips` run):** its line ends with "OR", and the next line is the alternative: "- Have 4+ years in infrastructure engineering with a strong interest in data". Both paths ask for 4+ years, so the flip holds either way. Both lines sit under "You might thrive in this role if you:", which the rule reads as requirements in v0.1 and v0.2 alike.
 
