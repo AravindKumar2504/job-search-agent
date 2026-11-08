@@ -57,10 +57,9 @@ class BoardStateTest(unittest.TestCase):
                     board_state.load(path, "greenhouse", "verkada")
 
     def test_layer_1_state_is_read_as_the_openai_board(self):
-        js1 = json.loads((REPO / "state" / "seen.json").read_text(encoding="utf-8")) \
-            if (REPO / "state" / "seen.json").exists() else None
-        if js1 is None:
-            self.skipTest("layer 1's state/seen.json has already been moved into the layer 2 format")
+        # A trimmed copy of layer 1's state/seen.json from JS1's final commit (d8b3896); the live one was moved
+        # into state/ashby-openai.json by my run of 2026-11-08 with --approve.
+        js1 = json.loads((REPO / "tests" / "fixtures" / "js1-state-seen-trimmed.json").read_text(encoding="utf-8"))
         path = self.dir / "seen.json"
         path.write_text(json.dumps(js1), encoding="utf-8")
         moved = board_state.load_js1(path)
