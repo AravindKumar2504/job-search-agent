@@ -55,9 +55,29 @@ The same two OpenAI postings flip under B, C and D: posting 19, and "Software En
 
 I ran it on 2026-11-08 at 5:45 PM ET, before any patch existed: `FAILED (failures=4)`. The two tests that say a wording is not a requirement passed, as they must before and after the patch.
 
-## 6. The patch, and the diff read as a change in behavior: to come
+## 6. The patch, and the diff read as a change in behavior
 
-## 7. Scope: to come
+**The patch (Claude Code, commit `4b1a418`, after my test in `788852b`).** 8 files, 89 lines added and 18 removed (`git show --stat 4b1a418`):
+
+| File | What changed |
+|---|---|
+| `job_agent/rule.py` | `years_asked` reads years in every sentence, except a number followed by "ago" or preceded by "next"; `judge`, `check_years` and `years_asked` take a contract version, and "0.1" keeps the old reading word for word |
+| `CONTRACT.md` | version 0.2: check 7's new wording, and my decision under "Where these choices come from" |
+| `job_agent/__init__.py` | `CONTRACT_VERSION` 0.1 to 0.2 |
+| `tests/test_rule.py` | JS1's check-7 test now runs with contract "0.1" (what it was written for); a v0.2 test beside it; v0.1's baseline counts kept, and a new test that v0.2 flips exactly 2 baseline postings |
+| `tools/experiment.py`, `tools/select_postings.py` | pinned to contract "0.1", because JS1's experiment and seeded selection were made with it; their committed reports and selection are unchanged |
+| `tools/rule_verdicts.py` | `--flips`: every posting whose verdict differs between v0.1 and v0.2 |
+| `tools/mutants.py` | 3 planted mistakes for the new reading: 61 of 61 caught |
+
+Measured on the 2026-10-30 baseline after the patch: 95 relevant become 93, and check 7 decides 50 postings instead of 48. The two flips are posting 19 and "Software Engineer, Data Infrastructure". My test passes, and so do all 202 tests on Python 3.12 and 3.9.
+
+**My reading of the diff as a change in behavior (mine):** to come
+
+## 7. Scope
+
+**Facts:** the reading changed only inside check 7; checks 1 to 6 have no changed line. Beyond `rule.py`, the patch touched JS1's experiment and selection tools only to pin them to v0.1, and JS1's tests to say which contract each one checks. v0.2 also reads two sentences that are not requirements, and the v0.2 test pins both: "10+ years in the industry is a plus." now blocks for Jane, and "We have grown 10x in 2 years." is read as 2 years, which Jane has.
+
+**My judgment of the scope (mine):** to come
 
 ## 8. Commands I ran myself: to come
 
