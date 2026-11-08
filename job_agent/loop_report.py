@@ -32,7 +32,7 @@ def summary(context, boards, repeats, over, verdicts, status, reasons, requests_
         "gone": sum(len(b.diff.gone) for b in with_diff),
         "new_relevant_rule": sum(1 for b, p in new if _rule(verdicts, b, p) == "relevant"),
         "new_relevant_claude": sum(1 for b, p in new if _claude(verdicts, b, p) == "relevant"),
-        "judged_after_waiting": sum(len(b.waiting_found) for b in read),
+        "judged_after_waiting": sum(len(_judged_now(b, verdicts)) for b in read),
         "waiting_for_claude": sum(len(b.still_waiting) for b in boards),
     }
     data = {
@@ -67,7 +67,7 @@ def counts_line(c: dict) -> str:
             f"{c['boards_not_visited']} not visited. {c['postings']} postings in the answers read, {c['new']} new "
             f"since the last run, {c['gone']} gone since the last run, {c['new_relevant_rule']} new and relevant by "
             f"the rule, {c['new_relevant_claude']} new and relevant in Claude's judgment, "
-            f"{c['waiting_for_claude']} waiting for Claude.")
+            f"{c['judged_after_waiting']} judged by Claude after waiting, {c['waiting_for_claude']} waiting for Claude.")
 
 
 def screen_lines(data: dict) -> list:
@@ -79,6 +79,9 @@ def screen_lines(data: dict) -> list:
                         if board["postings"] is not None else ""))
         for item in board["new"]:
             lines.append(f"NEW {board['key']} {item['id']} {item['title']} [{item['locations']}] | "
+                         f"{RULE_LABEL}: {item['rule_verdict']} | {CLAUDE_LABEL}: {item['claude_verdict']}")
+        for item in board["judged_after_waiting"]:
+            lines.append(f"WAITED {board['key']} {item['id']} {item['title']} [{item['locations']}] | "
                          f"{RULE_LABEL}: {item['rule_verdict']} | {CLAUDE_LABEL}: {item['claude_verdict']}")
     return lines
 
@@ -101,13 +104,18 @@ def _board(b, verdicts) -> dict:
         "baseline": diff.baseline if diff else None,
         "new": [_posting(b, p, verdicts) for p in diff.new] if diff else [],
         "gone": [{"id": i, "title": t} for i, t in diff.gone] if diff else [],
-        "judged_after_waiting": [_posting(b, p, verdicts) for p in b.waiting_found],
+        "judged_after_waiting": [_posting(b, p, verdicts) for p in _judged_now(b, verdicts)],
         "waiting_gone": list(b.waiting_gone),
         "still_waiting": list(b.still_waiting),
         "mapped_from": providers.MAPPED_FROM[b.system],
         "state": ("updated after this report (the trace records the write)" if b.status == "read"
                   else "kept exactly as it was"),
     }
+
+
+def _judged_now(b, verdicts) -> list:
+    """Postings that waited from an earlier run and got Claude's call in this one (not every one still waiting)."""
+    return [p for p in b.waiting_found if "claude" in verdicts.get((b.key, p["id"]), {})]
 
 
 def _over(b) -> dict:

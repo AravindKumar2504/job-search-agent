@@ -203,6 +203,27 @@ class LoopTest(unittest.TestCase):
         self.assertEqual(self.ws.judges.claude_calls[2:], ["a-4", "a-5"])  # the waiting one first
         self.assertEqual((again["exit"], self.ws.state(*OPENAI)["pending_claude"]), ("finished", []))
 
+    def test_judged_after_waiting_counts_only_the_postings_claude_judged_this_run(self):
+        # Found in live run 2026-11-08T222101Z: the report counted all 55 waiting postings as judged, though only
+        # 20 were. A run with 2 waiting and a budget of 1 judges 1 of them; the other still waits.
+        self.ws.boards(OPENAI)
+        self.ws.run(FakeNet({url(*OPENAI): [answer(*OPENAI, [ashby_job("a-1")])]}))  # baseline
+        jobs = [ashby_job("a-1"), ashby_job("a-2"), ashby_job("a-3")]
+        self.ws.run(FakeNet({url(*OPENAI): [answer(*OPENAI, jobs)]}), budgets=gate.Budgets().lowered(claude_calls=0))
+        self.ws.screen.clear()
+        summary = self.ws.run(FakeNet({url(*OPENAI): [answer(*OPENAI, jobs)]}),
+                              budgets=gate.Budgets().lowered(claude_calls=1))
+        openai = board_entry(summary, "ashby-openai")
+        self.assertEqual([i["id"] for i in openai["judged_after_waiting"]], ["a-2"])
+        self.assertEqual(openai["still_waiting"], ["a-3"])
+        self.assertEqual((summary["counts"]["judged_after_waiting"], summary["counts"]["waiting_for_claude"]), (1, 1))
+        self.assertIn("1 judged by Claude after waiting", summary["counts_line"])
+        waited = [line for line in self.ws.screen if line.startswith("WAITED ")]
+        self.assertEqual(len(waited), 1)
+        self.assertIn("a-2", waited[0])
+        report = (self.ws.run_dirs()[-1] / "report.md").read_text(encoding="utf-8")
+        self.assertIn("Judged now, after waiting for Claude (1)", report)
+
     def test_boards_over_the_boards_budget_are_not_visited(self):
         names = ["b1", "b2", "b3", "b4", "b5", "b6"]
         self.ws.boards(*[("greenhouse", n) for n in names])
