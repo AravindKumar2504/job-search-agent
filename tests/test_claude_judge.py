@@ -196,7 +196,22 @@ class ClaudeJudgeTest(unittest.TestCase):
     def test_the_real_init_event_passes_the_lockdown_check(self):
         folder = str(self.dir)
         self.assertIsNone(cj._loaded(dict(REAL_INIT, cwd=folder), folder))
-        self.assertEqual(sorted(p["name"] for p in REAL_INIT["plugins"]), sorted(cj.KNOWN_PLUGINS))
+        self.assertLessEqual({p["name"] for p in REAL_INIT["plugins"]}, set(cj.KNOWN_PLUGINS))
+
+    def test_the_2_1_317_init_event_passes_now_that_cc_plugin_privacy_is_trusted(self):
+        # The desktop app moved to Claude Code 2.1.317 after JS1; its init event lists a fourth built-in plugin.
+        init = json.loads((REPO / "tests" / "fixtures" / "claude-code-2.1.317-init.json").read_text(encoding="utf-8"))["init"]
+        folder = str(self.dir)
+        self.assertIn("cc-plugin-privacy", {p["name"] for p in init["plugins"]})
+        self.assertIsNone(cj._loaded(dict(init, cwd=folder), folder))
+
+    def test_a_built_in_plugin_that_is_not_on_the_list_is_still_refused(self):
+        init = json.loads((REPO / "tests" / "fixtures" / "claude-code-2.1.317-init.json").read_text(encoding="utf-8"))["init"]
+        folder = str(self.dir)
+        plugins = init["plugins"] + [{"name": "cc-plugin-made-up", "path": "builtin", "source": "cc-plugin-made-up@builtin"}]
+        self.assertIn("plugin(s) other than its known built-in ones", cj._loaded(dict(init, cwd=folder, plugins=plugins), folder))
+        named = [dict(p, path="/somewhere/else") if p["name"] == "cc-plugin-privacy" else p for p in init["plugins"]]
+        self.assertIn("plugin(s) other than its known built-in ones", cj._loaded(dict(init, cwd=folder, plugins=named), folder))
 
     def test_a_cli_that_cannot_be_run_is_no_valid_judgment_not_a_crash(self):
         verdict = cj.judge(POSTING, JANE, prompt_path=PROMPT, record_dir=self.dir / "claude",

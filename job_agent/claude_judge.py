@@ -48,7 +48,10 @@ MAX_SENTENCES = 3
 # Claude Code adds about 2,000 tokens of its own to a call: measured on the 66 calls of 2026-10-30, 1,866 to 2,313
 # above one token per four characters sent. A context the size of a memory file would pass this allowance.
 OVERHEAD_TOKENS = 3_500
-KNOWN_PLUGINS = ("cc-plugin-sec-default", "cc-plugin-agents-md", "cc-plugin-plugin-authoring")  # built into 2.1.309
+# Built-in plugins trusted by name. The first three were built into Claude Code 2.1.309 (JS1). The desktop app
+# moved to 2.1.317, which adds cc-plugin-privacy; it was trusted on 2026-11-08 by my decision, after one call
+# showed it loads no tools, MCP servers, skills or slash commands. What it does inside a call is not checked.
+KNOWN_PLUGINS = ("cc-plugin-sec-default", "cc-plugin-agents-md", "cc-plugin-plugin-authoring", "cc-plugin-privacy")
 FULLWIDTH_AT = "＠"
 SEAT = "none"  # the init event's apiKeySource when the CLI uses a claude.ai login, not an API key
 PERMISSION_MODE = "dontAsk"
