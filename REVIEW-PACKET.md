@@ -26,7 +26,20 @@ The question: of the 95 postings my rule calls relevant on the 2026-10-30 baseli
 
 **My guess (mine):** I guess 12, because while 60 total postings state years without the word "experience", most of those are already rejected by earlier checks on job title or level.
 
-## 4. How years should be read (contract v0.2): to come
+## 4. How years should be read (contract v0.2)
+
+Measured after my guess was committed (e3ea1e2), on OpenAI's 2026-10-30 answer and on the three boards' answers from my live run 1 (2026-11-08):
+
+| Reading | OpenAI Oct 30 (95 relevant) | OpenAI Nov 8 (91) | Verkada (5) | Palantir (9) |
+|---|---:|---:|---:|---:|
+| A: keep v0.1, only sentences with "experience" | 0 flip | 0 | 0 | 0 |
+| B: every sentence that states years | 2 | 2 | 0 | 0 |
+| C: "experience" sentences plus bullet lines | 2 | 2 | 0 | 0 |
+| D: "experience" sentences plus "N years in/of/with/as/at/on" or "N years <doing>" | 2 | 2 | 0 | 0 |
+
+The same two OpenAI postings flip under B, C and D: posting 19, and "Software Engineer, Data Infrastructure" ("- Have 4+ years in data infrastructure engineering OR"). **My guess was 12; the count is 2.** The readings differ only on postings the rule already rejects for other reasons. Of the 8 sentences that B reads and C and D do not, 6 on Verkada are real requirements (for example "2+ years productionizing modern LLMs, VLMs, or agentic systems" and "for the last 3+ years within a similar company"), and 2 are not: Palantir's "team was formed 15+ years ago" and Verkada's "5x the business over the next 3 years". C also depends on bullet marks, which Greenhouse's HTML lists lose when they become text.
+
+**My pick (2026-11-08, multiple choice, after seeing this table): E**, every sentence that states years, except "N years ago" and "the next N years". Claude Code laid out A to E and recommended E.
 
 ## 5. My test, written before the patch: to come
 
