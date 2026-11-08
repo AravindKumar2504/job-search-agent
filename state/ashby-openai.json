@@ -822,9 +822,9 @@
    "bd1ac97f-20f9-4727-9f92-7064035a416f"
   ],
   "postings": 816,
-  "run_id": "2026-11-08T232915Z",
+  "run_id": "2026-11-08T233158Z",
   "source": "live",
-  "started_at": "2026-11-08T23:29:15Z",
+  "started_at": "2026-11-08T23:31:58Z",
   "titles": {
    "00207abc-49b7-465c-a219-f7c1140f8047": "Forward Deployed Software Engineer - SF",
    "01091aed-427d-4e10-8cdb-fb500cf55bb9": "Applied AI Engineer, Enterprise",
@@ -1646,23 +1646,7 @@
  },
  "moved_from": "state/seen.json (layer 1, schema 1)",
  "name": "openai",
- "pending_claude": [
-  "9c1aa1f3-b4d0-48fa-814b-37d36ad0ad2e",
-  "20df76c8-aa7e-40d1-8602-28605ed5431b",
-  "2c531790-726c-4d39-b3bd-900c59a09a4d",
-  "d4650f77-45ed-4bee-92ac-097a62fa6341",
-  "a84e6109-142f-45ae-80e1-05811732cca1",
-  "a12c3c93-51df-437d-862f-4892367fea32",
-  "cda6eab0-edab-4dfc-8923-40ca3b0928b5",
-  "554a6565-0c9a-42e8-8f6f-a22ba23f336b",
-  "015de5ce-8210-418d-abc6-f8b8712f0dbd",
-  "087aa4f5-1192-413a-ba34-3ae324cf90e5",
-  "94d44e8c-987f-4350-bb13-5a855be957db",
-  "41408133-b45f-4c7b-a0df-c050f16d92de",
-  "0cf4a8f4-a57a-494b-aad8-4df8ac096939",
-  "218c0b55-53bd-4df6-805d-321a8c2e7db7",
-  "bd1ac97f-20f9-4727-9f92-7064035a416f"
- ],
+ "pending_claude": [],
  "runs": [
   {
    "code_sha256": "6a0cb1eae6f911556df0a132d38d85d42ae75606cb2dfaf8397fa33d016326f5",
@@ -1712,6 +1696,15 @@
    "run_id": "2026-11-08T232915Z",
    "source": "live",
    "started_at": "2026-11-08T23:29:15Z"
+  },
+  {
+   "answer_sha256": "7aff4139e7e97306874e8b0cf659a2e4ad9ca5703261dda5c7885154c3e62d04",
+   "gone": 0,
+   "new": 0,
+   "postings": 816,
+   "run_id": "2026-11-08T233158Z",
+   "source": "live",
+   "started_at": "2026-11-08T23:31:58Z"
   }
  ],
  "schema": 2,
