@@ -19,7 +19,9 @@ from job_agent.resume import _fictional_phone
 REPO = Path(__file__).resolve().parent.parent
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 PHONE = re.compile(r"(?<![\d-])(?:\+?1[ .-]?)?\(?\d{3}\)?[ .-]?\d{3}[ .-]\d{4}(?![\d-])")
-ALLOWED_EMAIL_ENDINGS = ("@example.com", "@users.noreply.github.com")
+# example.com and the whole .example top-level domain are reserved for examples (RFC 2606), so an address
+# there is never a real one; boundary case 3 needs "api.lever.co@evil.example", a URL trick, not a contact.
+ALLOWED_EMAIL_ENDINGS = ("@example.com", ".example", "@users.noreply.github.com")
 # Public addresses printed in a company's own postings (not anyone's personal contact), allowed only in
 # saved board answers (runs/) and test fixtures (tests/fixtures/). Each one is added by a reviewed commit.
 PUBLIC_BOARD_ADDRESSES = {"accommodations" + "@" + "palantir.com"}  # split so this file does not hold it
