@@ -79,7 +79,15 @@ Measured on the 2026-10-30 baseline after the patch: 95 relevant become 93, and 
 
 **My judgment of the scope (mine):** to come
 
-## 8. Commands I ran myself: to come
+## 8. Commands I ran myself
+
+All in my own terminal on 2026-11-08 (ET), with their output logged in MY-CHECKS.md:
+
+| When | Command | Result |
+|---|---|---|
+| 5:24 PM | `python3 tools/explain_rule.py runs/2026-10-30T093102Z/response.json 9efcef02-0515-4672-bace-81329944b38b` | the bug: relevant, check 7 "states no years" |
+| 5:45 PM | `python3 -m unittest tests.test_years_v02` (before the patch) | FAILED (failures=4) |
+| 6:00 PM | `python3 -m unittest tests.test_years_v02` (after the patch) | OK, 5 of 5 |
 
 ## 9. My decision (accept, revise or reject) and the evidence: to come
 
