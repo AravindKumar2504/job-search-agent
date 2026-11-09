@@ -20,6 +20,12 @@ Output (as logged in MY-CHECKS.md): "Rule verdict (record): relevant" and "Check
 
 **What I ran and saw (mine):** Running explain_rule.py on posting 19 from the October 30 saved answer showed that the rule marked it relevant because check 7 only checks sentences containing the word "experience" and missed the actual requirement of "5+ years". Consequently, the agent failed to catch that Jane only has 3 years of experience and incorrectly let the posting pass.
 
+**To see the bug again after the patch (a note added on 2026-11-09):** the command above now applies contract v0.2, whose check 7 reads the "5+ years" and calls the posting not relevant. `--contract 0.1`, added to the tool on 2026-11-09 with a test, shows the reading I reproduced:
+
+```text
+python3 tools/explain_rule.py --contract 0.1 runs/2026-10-30T093102Z/response.json 9efcef02-0515-4672-bace-81329944b38b
+```
+
 ## 3. My prediction, before any count (2026-11-08, 5:40 PM ET)
 
 The question: of the 95 postings my rule calls relevant on the 2026-10-30 baseline (814 postings), how many flip to not relevant once years are also read outside "experience" sentences?

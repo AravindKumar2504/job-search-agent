@@ -28,8 +28,6 @@ The 19 cases test the permission policy in GATE.md v1.0: which hosts, paths and 
 
 18 of 19 predictions match. The Actual column and the section below come from `python3 tools/boundary_table.py`, which runs the same cases as `tests/test_boundary.py`; `--check` reruns them and compares.
 
-18 of 19 predictions match. The Actual column and the section below come from `python3 tools/boundary_table.py`, which runs the same cases as `tests/test_boundary.py`; `--check` reruns them and compares.
-
 ## What the program said
 
 1. **refuse**: refused: host 'evil.example' is not on the allow-list (api.ashbyhq.com, api.lever.co, boards-api.greenhouse.io)

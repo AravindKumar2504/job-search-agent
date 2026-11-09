@@ -24,6 +24,7 @@ sys.path.insert(0, str(REPO))
 spec = importlib.util.spec_from_file_location("test_boundary", REPO / "tests" / "test_boundary.py")
 cases = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(cases)
+SUMMARY = re.compile(r"^\d+ of \d+ predictions match\. .*\n?", re.MULTILINE)  # an earlier fill's summary
 ROW = re.compile(r"^\|\s*(?P<n>\d+)\s*\|\s*(?P<action>.*?)\s*\|\s*(?P<predicted>allow|refuse|approval)\s*\|"
                  r"\s*(?P<actual>[^|]*?)\s*\|\s*(?P<match>[^|]*?)\s*\|$")
 
@@ -50,7 +51,7 @@ def filled(text: str, results: dict) -> str:
     if seen != set(results):
         raise SystemExit(f"the table has rows for {sorted(seen)}, the cases are {sorted(results)}")
     body = "\n".join(lines)
-    body = body.split("\n" + DETAILS)[0].rstrip() + "\n"
+    body = SUMMARY.sub("", body.split("\n" + DETAILS)[0]).rstrip() + "\n"
     matched = sum(1 for n in results if f"| {n} |" in body and "| yes |" in _row(body, n))
     body += (f"\n{matched} of {len(results)} predictions match. The Actual column and the section below come from "
              "`python3 tools/boundary_table.py`, which runs the same cases as `tests/test_boundary.py`; "
