@@ -1,7 +1,7 @@
 {
  "last_run": {
-  "answer_sha256": "8ce0bf74addf9535ad893e502af565854d1d01450ae81712ea94f1db4b052ca9",
-  "gone": 0,
+  "answer_sha256": "900ed27b9d19a3fa52394216c06ed325be42248503e2eb14c594ef2cc2808297",
+  "gone": 1,
   "new": 0,
   "posting_ids": [
    "6ed76ce8-4156-4b60-b120-403538bd66cd",
@@ -46,7 +46,6 @@
    "fa93a1f8-dc95-40d0-b5ca-f2aebaab0806",
    "2bfdcb53-7abd-42a4-9eaf-ebe07450f798",
    "1a53939d-8ffa-4570-b31a-6d0bc53fdb59",
-   "1f007e36-a620-4d15-bf0b-70dc3f3439d8",
    "2f3a0a57-8f77-44d2-99c3-18aef115374f",
    "30c2563d-9a16-4dd7-81e8-b6f646384199",
    "44d3394e-003e-4609-b864-ff141e233635",
@@ -310,10 +309,10 @@
    "5c7bb70c-83ea-43e7-8055-0c8f319f4333",
    "655f9937-a4ce-4e7d-80e2-a6659af07329"
   ],
-  "postings": 305,
-  "run_id": "2026-11-08T233158Z",
+  "postings": 304,
+  "run_id": "2026-11-09T210704Z",
   "source": "live",
-  "started_at": "2026-11-08T23:31:58Z",
+  "started_at": "2026-11-09T21:07:04Z",
   "titles": {
    "00c2c97b-8514-4617-9883-e53e486b6dcd": "Forward Deployed Enablement Engineer - Customer Success",
    "0492e9c4-9ba9-4da0-896f-75be5151bae9": "Physical Security Manager",
@@ -346,7 +345,6 @@
    "1bb19522-3936-4adc-9ced-c3df8b5900b9": "Forward Deployed Software Engineer",
    "1e77a5e8-9843-4516-a186-7c24f0ff07a0": "Information Security Engineer - Infrastructure Security",
    "1ef0cb77-03a2-4b60-b61d-ace924ef06e7": "Corporate Counsel",
-   "1f007e36-a620-4d15-bf0b-70dc3f3439d8": "Deployment Strategist - Spain",
    "20f220d8-02bb-404f-bbf1-1022ff3df6b7": "International Accountant",
    "211f99dc-269e-4f25-84d3-d73dea782080": "Site Reliability Engineer - US Government",
    "2127f3af-1fb3-4aa3-9aa1-eb06967e0166": "Information Security Engineer - Insider Risk",
@@ -660,6 +658,15 @@
    "run_id": "2026-11-08T233158Z",
    "source": "live",
    "started_at": "2026-11-08T23:31:58Z"
+  },
+  {
+   "answer_sha256": "900ed27b9d19a3fa52394216c06ed325be42248503e2eb14c594ef2cc2808297",
+   "gone": 1,
+   "new": 0,
+   "postings": 304,
+   "run_id": "2026-11-09T210704Z",
+   "source": "live",
+   "started_at": "2026-11-09T21:07:04Z"
   }
  ],
  "schema": 2,
