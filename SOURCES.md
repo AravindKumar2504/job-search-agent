@@ -6,7 +6,7 @@ JS1's sources are in [js1/SOURCES.md](js1/SOURCES.md); everything listed there s
 
 The gate came first. I made its calls: the boards (from my own target list), the budgets, one retry for transient failures only, my approval for replacing or deleting a board's state, and all four wrong versions, picking each after seeing the measured numbers. Claude Code laid out the options, proposed the defaults I accepted, and put it all into words; I approved GATE.md before any JS2 code existed (`84d9f4c`, 2026-11-07, 1:45 AM ET). Only then did Claude Code write the code, the tests and the tools against it.
 
-I ran every live run in `runs/` from 2026-11-08 on, and every command in [MY-CHECKS.md](MY-CHECKS.md). I typed my 19 boundary predictions before any boundary test existed, every part of REVIEW-PACKET.md marked as mine, and every FRICTIONAL.md entry. Claude Code copied those word for word and added only headings, dates and evidence lines.
+I ran every live run in `runs/` from 2026-11-08 on, and every command in [MY-CHECKS.md](MY-CHECKS.md). I typed my 19 boundary predictions before any boundary test existed, every part of REVIEW-PACKET.md marked as mine, every FRICTIONAL.md entry, my sign-off and the reasons in the driver's seat. Claude Code copied those word for word and added only headings, dates, labels and evidence lines.
 
 ## What Claude Code did, specifically
 
@@ -20,7 +20,8 @@ I ran every live run in `runs/` from 2026-11-08 on, and every command in [MY-CHE
 - **Fixed a bug in its own report code** that my second run exposed (55 postings counted as judged after waiting, where 20 were): a regression test that failed first, then the fix (`e42796d`).
 - **Fixed three problems of its own on 2026-11-09**, at my word: `tools/boundary_table.py` added its summary paragraph again on each refill (BOUNDARY-TESTS.md had it twice); `tools/explain_rule.py` could no longer show posting 19's bug after the patch, so it now takes `--contract 0.1`; and five links in `js1/` pointed to `experiment/` from the wrong folder. The four new tests in `tests/test_doc_tools.py` came with the first two fixes, and three of them failed before the fixes.
 - **Wrote README.md, this file, and the facts around my words** in BOUNDARY-TESTS.md, REVIEW-PACKET.md and MY-CHECKS.md, and, on 2026-11-09, ran the independent check on all five live runs and recomputed the new and gone postings of that day's run from the saved answers alone.
-- **Checked what I wrote against the record and the code** before it went in (my FRICTIONAL.md entries and my parts of the review packet), and asked me to rewrite what did not match. The text is mine; it did not reword it.
+- **Checked what I wrote against the record and the code** before it went in (my FRICTIONAL.md entries, my parts of the review packet, my sign-off and my driver's-seat reasons), and asked me to rewrite what did not match. The text is mine; it did not reword it.
+- **Wrote an explainer of the whole agent for me** on 2026-11-09 (facts and concepts only, no answers), so I could write my sign-off, driver's-seat reasons and Monday entry myself.
 
 ## What I used
 
@@ -32,5 +33,6 @@ I ran every live run in `runs/` from 2026-11-08 on, and every command in [MY-CHE
 - The Reallocation Engine (Nik Bear Brown, MIT license): Jane Doe's résumé layout, from JS1. Its ATS providers and `greenhouse-watch` skill were not used.
 - Lectern (`fall-2026/nik-bear-brown/lectern` in the course repo): its board list was read on 2026-11-06 while I chose boards. Its collectors were not used.
 - Python's standard library only.
+- Another AI assistant organized my notes for the sign-off, the driver's-seat reasons and my Monday entry, from Claude Code's explainer, as the course's Frictional guide allows ("AI can organize your notes; you must supply the actual experience"). The experience and the final sentences are mine.
 
-**[AI policy line: yours, only if true. The brief says to read the course AI policy and watch its video before graded work. If you did, type one sentence with when; if not, say so and we leave it out.]**
+**The course AI policy:** I read the course AI policy and watched its video, titled "AI Policy for Professor Bear's Courses | Using AI Responsibly in Class", before starting JS1.

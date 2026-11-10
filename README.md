@@ -47,7 +47,7 @@ Plants 61 mistakes in a copy of the code, one at a time, and checks that the tes
 ```bash
 python3 tools/check_run.py runs/2026-11-08T221447Z
 ```
-The independent check of one saved run. It imports nothing from the agent: it reads only the saved raw answers and `report.json`, works out each board's status, postings, new and gone by its own reading, and checks the exit. Exit 0 means no disagreement.
+The independent check of one saved run. It imports nothing from the agent and reads only the saved raw answers and `report.json`. From the answers alone it decides whether each board could be read and how many postings it holds, checks that every posting reported new is in the answer and every posting reported gone is not, and checks the exit. Exit 0 means no disagreement. It does not work out which postings are new, since that needs earlier runs' answers; GATE.md's sentence that it "recomputes ... new and gone" says more than the tool does. For the 2026-11-09 run, Claude Code did that recomputation separately (see "What ran").
 
 ```bash
 python3 tools/wrong_answer_demo.py runs/2026-11-08T221447Z /tmp/js2-demo
@@ -110,6 +110,7 @@ Every live run below was mine, run in the terminal of the Claude desktop app on 
 
 - Check 7 still misses some wordings: "a minimum of 5 calendar years", "5+ yrs" and "Five-plus years" read as no years (REVIEW-PACKET.md, part 10).
 - Contract v0.2 also reads sentences that are not requirements: "10+ years in the industry is a plus" blocks for Jane, and "We have grown 10x in 2 years" reads as 2 years. Neither changed a verdict in my saved answers, but both can.
+- Check 6 misses a start date written with an abbreviated month: in "You must start by Dec. 2026." the sentence split breaks after "Dec.", so the posting passes, while "December 2026" fails it as it should. Check 7 does not read months ("18 months of experience") and reads "up to 5 years" as 5. These gaps come from JS1 and are unchanged in JS2.
 - A Claude answer the validator rejects is never retried (the contract's rule), so a posting can end with only the rule's verdict, as the EDA posting did.
 - The Greenhouse and Lever mappings are tested on saved answers from one board each, Verkada and Palantir. Other boards on those systems may fill their fields differently; a Greenhouse board with no "Employment Type" field passes check 1 as not stated.
 - The retry for transient failures, and the request and time budgets running out, happened only in tests with a stand-in network; no live run hit them. Boundary cases 7 and 8 also use the stand-in, so no real request is sent.
@@ -135,30 +136,52 @@ Every live run below was mine, run in the terminal of the Claude desktop app on 
 
 ## Sign-off
 
-**[Yours to type. Shape from the brief:]**
-
 ```text
 Sign-off: Job-Search Agent 2
-Checked:      which properties, by which of my own tests (name them)
-How:          by hand / by a test I wrote before reading Claude's code /
-              by recomputation / with Claude's help (say which parts)
-Not checked:  at least three real items
-Not claiming: what this agent does not show
-Signed or withheld: ____________ (name, date)
+Checked:      - Ran check_run.py on run 1 and today's run (2026-11-09T210704Z); it checks that each
+                reported new ID is in the saved answer and each gone ID is not.
+              - Inspected DEMO.md and the two lines it printed; it shows the independent check
+                catching planted version 1a (a 404 read as 0 postings).
+              - Ran boundary_table.py --check to confirm the 19 cases still match the table
+                (18 matched my predictions).
+              - Ran tests.test_years_v02 (failing at 5:45 PM before the patch, passing at 6:00 PM
+                after), which Claude Code drafted from my pick E.
+              - rule_verdicts.py --flips: verified by recomputation that the patch changed exactly
+                2 verdicts on the Oct 30 baseline.
+              - mutants.py: verified by running the suite that all 61 planted mistakes were caught.
+              - Read the diff at 6:24 PM on 11/8 and subsequently wrote the scope judgment at 6:25 PM.
+              - Ran 5 live runs observing budget-exhausted (3 runs) and incomplete (2 runs); error
+                exits appear only in tests.
+How:          By recomputation (check_run.py, boundary_table.py, rule_verdicts.py), by hand
+              (inspecting DEMO.md, reading the diff), with a test drafted by Claude from my pick E
+              and run by me, and with Claude Code writing the code and tools. mutants.py plants
+              mistakes in a copy of the code and checks that the tests catch them. Claude Code wrote
+              all 206 tests (including drafting my v0.2 test) and recomputed today's new and gone.
+Not checked:  1. What cc-plugin-privacy actually does internally during a Claude call.
+              2. Whether Claude's 89 valid judgment verdicts are factually correct.
+              3. A real network timeout or 5xx server retry on a live board (tested via stand-ins
+                 only).
+Not claiming: - That the agent finds every relevant job in existence.
+              - The agent does not show that Claude's verdicts are right.
+              - Not claiming that Jane Doe's results would carry over to my own personal search
+                without further verification.
+Signed:       Aravind Sundaravadivelu — November 9, 2026
 ```
+
+The sign-off is my own text, typed in chat on 2026-11-09 and copied word for word; Claude Code only broke the lines to fit and added the run id after "today's run".
 
 ## Driver's seat
 
-For the loop and for the review: what Claude Code did, what I did, and why that part stays mine. The first two columns and the evidence come from the record; **the "why" column is yours to type.**
+For the loop and for the review: what Claude Code did, what I did, and why that part stays mine. The first two columns and the evidence come from the record, filled in by Claude Code; the "Why it stays mine" column is in my own words, typed in chat on 2026-11-09.
 
 | Part | What Claude Code did | What I did | Why it stays mine | Evidence |
 |---|---|---|---|---|
-| The gate's rules | Measured the boards, laid out options with the numbers, proposed defaults, wrote GATE.md's text | Picked the boards, the budgets, the retry rule, the approval rule and the wrong versions; accepted the defaults; approved GATE.md | **[yours]** | `84d9f4c`; GATE.md, "Where these choices come from" |
-| The loop's code and tests | Wrote the loop, the policy module, the tests and the planted mistakes | Ran the planted mistakes myself (61 of 61 caught) | **[yours]** | `ab2df17`, `10833a9`, `e569577`; MY-CHECKS.md, 6:02 PM |
-| Running on real boards | No live run in `runs/` (only a scratch rehearsal) | Ran all five live runs, and approved moving my JS1 state | **[yours]** | `8aa6075`, `62ef1a6`, `0be7a10`, `84630ab`, **[today's commit]**; trace step 3 of the first run |
-| What the policy should do | Wrote the 19 cases and their tests after my predictions were committed | Predicted all 19 before any test existed, then reran the table | **[yours]** | `21f33b7` before `e569577`; `b7b6cc0` |
-| Trusting new Claude Code software | Found that the update made the lockdown refuse every call, read one call's startup record, proposed the fix and checked it with a second call | Decided to trust the plugin, knowing what it does is not checked | **[yours]** | `8ca0d4b` |
-| Catching the finished wrong answer | Wrote the independent check and the demo tool | Ran the check and the demo on my run | **[yours]** | `14d5868`, `c03eb75` |
-| The review: the bug, my guess and my test | Recommended this defect (noted in JS1); wrote `explain_rule.py`; counted the flips after my guess; measured readings A to D and recommended E; drafted my test from my pick | Picked the defect, reproduced it, guessed 12 before any count, picked E, and ran my test failing (4 of 5) before any patch existed | **[yours]** | `ab1c21a`, `e3ea1e2`, `5c788db`, `788852b` |
-| The review: the patch and the decision | Wrote the patch; checked my written parts against the code | Ran my test passing, the flips and the planted mistakes; read the diff in my terminal; decided to accept, with my evidence; named the cases my test still misses | **[yours]** | `4b1a418`, `e7fed25`, `958d0a2`, `a04066b`, `6ecf6b0`, `584eac4` |
-| Publishing | Prepares the course folder, the PR and the zip | Approves every push, the PR and the Canvas upload | **[yours]** | **[Tuesday]** |
+| The gate's rules | Measured the boards, laid out options with the numbers, proposed defaults, wrote GATE.md's text | Picked the boards, the budgets, the retry rule, the approval rule and the wrong versions; accepted the defaults; approved GATE.md | I chose these rules because they determine which companies my agent monitors, how much it can use, when it retries and when it can change saved data. Claude Code helped me compare the options, but I made the final decisions because I am responsible for how my agent behaves. | `84d9f4c`; GATE.md, "Where these choices come from" |
+| The loop's code and tests | Wrote the loop, the policy module, the tests and the planted mistakes | Ran the planted mistakes myself (61 of 61 caught) | Claude Code wrote the tests and planted the mistakes, but I ran all 61 myself. I wanted to make sure the tests actually caught those mistakes instead of just trusting Claude Code's claim that everything worked. All 61 were caught. | `ab2df17`, `10833a9`, `e569577`; MY-CHECKS.md, 6:02 PM |
+| Running on real boards | No live run in `runs/` (only a scratch rehearsal) | Ran all five live runs, and approved moving my JS1 state | I personally ran all five live runs because I wanted to see how the agent behaved with real job boards rather than relying only on simulated tests. I was also responsible for approving the initial migration of my existing JS1 state. | `8aa6075`, `62ef1a6`, `0be7a10`, `84630ab`, `b490e1c`; trace step 3 of the first run |
+| What the policy should do | Wrote the 19 cases and their tests after my predictions were committed | Predicted all 19 before any test existed, then reran the table | I wrote my 19 predictions before running the tests so I could record what I genuinely expected without being influenced by the results. Eighteen matched, and case 8 showed me that my understanding of the redirect policy was wrong. | `21f33b7` before `e569577`; `b7b6cc0` |
+| Trusting new Claude Code software | Found that the update made the lockdown refuse every call, read one call's startup record, proposed the fix and checked it with a second call | Decided to trust the plugin, knowing what it does is not checked | I made the decision to trust the new plugin even though I could not fully verify what it might do to the text sent to Claude. I knew it loaded no additional tools or MCP servers, but there was still uncertainty about how it handled the calls. I accepted that risk myself. | `8ca0d4b` |
+| Catching the finished wrong answer | Wrote the independent check and the demo tool | Ran the check and the demo on my run | The independent check cannot rely on the agent's report because an agent cannot reliably audit its own bugs without independent recomputation. | `14d5868`, `c03eb75` |
+| The review: the bug, my guess and my test | Recommended this defect (noted in JS1); wrote `explain_rule.py`; counted the flips after my guess; measured readings A to D and recommended E; drafted my test from my pick | Picked the defect, reproduced it, guessed 12 before any count, picked E, and ran my test failing (4 of 5) before any patch existed | I made my estimate and ran the failing test Claude Code drafted before the patch existed, so I could check my understanding before seeing how the code was changed. | `ab1c21a`, `e3ea1e2`, `5c788db`, `788852b` |
+| The review: the patch and the decision | Wrote the patch; checked my written parts against the code | Ran my test passing, the flips and the planted mistakes; read the diff in my terminal; decided to accept, with my evidence; named the cases my test still misses | Passing test suites cannot decide whether a code change is acceptable because human judgment is required to evaluate behavioral trade-offs. | `4b1a418`, `e7fed25`, `958d0a2`, `a04066b`, `6ecf6b0`, `584eac4` |
+| Publishing | Prepares the course folder, the PR and the zip | Approves every push, the PR and the Canvas upload | Pushing the code and uploading the zip finalizes my submission, locking in my personal accountability for everything included in the repository. | To come on Tuesday 11/10: the push, the PR and the upload |
