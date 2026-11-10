@@ -24,3 +24,15 @@ Evidence: GATE.md (`84d9f4c`); the build commits `ab2df17`, `10833a9`, `5df1dc4`
 - **What I'm still unsure about:** Whether sentences stating years purely as a bonus (such as "10+ years in the industry is a plus") will end up incorrectly rejecting otherwise strong candidate postings.
 
 Evidence: the plugin decision (`8ca0d4b`); my predictions (`21f33b7`) and the boundary tests (`e569577`); my four runs (`8aa6075`, `62ef1a6`, `0be7a10`, `84630ab`) and the report fix my second run exposed (`e42796d`); the demo (`c03eb75`); the review packet, from my guess (`e3ea1e2`) and my failing test (`788852b`) to the patch (`4b1a418`) and my decision (`584eac4`); every command I ran, in MY-CHECKS.md.
+
+## Monday 11/9
+
+- **Tried and expected:** Expected the run to end incomplete (code 1) or budget-exhausted before my 4:07 PM run.
+- **Friction and response:** I ran the independent check at 4:12 PM using python3 tools/check_run.py runs/2026-11-09T210704Z. It checked the report against the saved raw board responses and showed no disagreement. The run had found 15 new postings and 22 gone postings, and all 15 new postings were judged.
+- **What I did vs. what Claude did:** Claude drafted the documentation and ran the recomputations; I read the drafts before confirming them, ran the live run resulting in `incomplete` due to the 404 made-up board, and approved the run and check commits (`b490e1c`).
+- **Verifications and approvals:** Ran `check_run.py` (no disagreement), while separate recomputation found the 15 new and 22 gone postings. Claude Code handled the separate recomputation.
+- **Tests and fixes:** I reviewed the diff for the duplicated paragraph, the outdated reproduction command and the five broken links before approving the changes. Claude Code implemented the fixes and ran the tests, full test suite and planted-mistake checks.
+- **What is still unresolved:** I understand that the current rule treats optional experience statements like "10+ years in the industry is a plus" as requirements. What I still don't know is whether this could cause the agent to reject suitable jobs in future postings. I need to examine more real job descriptions to understand how often this happens and whether optional qualifications should be treated differently from mandatory requirements.
+- **What's next for tomorrow:** Packaging the repository, ensuring the zip matches the GitHub folder exactly, and completing the final submission.
+
+Evidence: my run and my check (`b490e1c`; MY-CHECKS.md, 4:07 PM and 4:12 PM); the fixes I approved after reading the diff (`487ab4c`, `2695e78`); the README and SOURCES I approved (`65703fe`).
