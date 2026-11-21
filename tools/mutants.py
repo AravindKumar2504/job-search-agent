@@ -2,7 +2,8 @@
 
 A suite that still passes when the code is broken proves nothing. Each mutant below swaps one piece
 of code for a plausible mistake. The first entries are the contract's "Wrong versions" (W1 to W4);
-the ones marked "extra" are further mistakes the tests also have to catch. The copy lives in a
+the ones marked "extra" are further mistakes the tests also have to catch. The entries marked "JS3" are
+FILTER.md v1.0's wrong versions (Section 4, W1 to W7) and further mistakes in the JS3 filter. The copy lives in a
 temporary folder, so the repo itself is never touched. A mutant is "caught" when a test fails.
 
 Usage (from the repo root):  python3 tools/mutants.py
@@ -25,7 +26,7 @@ REPO = Path(__file__).resolve().parent.parent
 # runs/: the rule's tests read the real baseline response; labels/ and tools/: the selection and label tests;
 # experiment/: the Claude judge's tests copy Claude Code's real init event from a saved call.
 COPIED = ("job_agent", "tests", "persona", "runs", "labels", "tools", "prompts", "experiment")
-COPIED_FILES = ("GATE.md", "boards.json")  # tests/test_gate.py compares the code's numbers with GATE.md
+COPIED_FILES = ("GATE.md", "boards.json", "FILTER.md")  # test_gate.py reads GATE.md; the JS3 filter reads FILTER.md
 
 # (label, file, old text, new text)
 MUTANTS = [
@@ -187,6 +188,51 @@ MUTANTS = [
      "            return _unverified(board, trace, str(exc))\n        saved = _save_answer(",
      "            if not retry:\n                continue\n"
      "            return _unverified(board, trace, str(exc))\n        saved = _save_answer("),
+    # JS3: FILTER.md v1.0, Section 4's wrong versions W1 to W7, then extra mistakes in the filter (2026-11-21).
+    ("JS3 W1 role phrases match inside longer words", "job_agent/filter.py",
+     '    included = next((p for p in rules["role_includes"] if _has_word(part, p)), None)',
+     '    included = next((p for p in rules["role_includes"] if p.lower() in part.lower()), None)'),
+    ("JS3 W2 years read only in sentences with 'experience'", "job_agent/filter.py",
+     "    for sentence in sentences:\n        for match in YEARS.finditer(sentence):\n",
+     "    for sentence in sentences:\n        if \"experience\" not in sentence.lower():\n            continue\n"
+     "        for match in YEARS.finditer(sentence):\n"),
+    ("JS3 W3 optional years treated as required", "job_agent/filter.py",
+     '            if any(_has_word(sentence, p) for p in rules["years_optional_phrases"]):',
+     "            if any(_has_word(sentence, p) for p in []):"),
+    ("JS3 W4 one posting with no title refuses its board", "job_agent/providers.py",
+     '            posting["title"] = ""\n            posting["_cannot_tell"] = "the posting has no title"\n',
+     '            raise Unverified(f"job {index} has no title")\n'),
+    ("JS3 W5 ties broken by the order postings arrive", "job_agent/filter.py",
+     '    return (-record["score"], 0 if when else 1, -(when.timestamp() if when else 0), str(record["id"]))',
+     '    return (-record["score"],)'),
+    ("JS3 W6 REST matched in any case", "job_agent/filter.py",
+     "                hit = _has_exact_word(sentence, term) if term in exact else _has_word(sentence, term)",
+     "                hit = _has_word(sentence, term)"),
+    ("JS3 W7 every location outside the person's areas rejected", "job_agent/filter.py",
+     '        return _result("R2", "soft", us_seen[0],', '        return _result("R2", "reject", us_seen[0],'),
+    ("JS3 extra: the 'Dec.' splitter fix is gone", "job_agent/filter.py",
+     '        if out and out[-1][1] == " " and _MONTH_ABBREVIATION_END.search(out[-1][0]) and _YEAR_START.match(piece):',
+     "        if False:"),
+    ("JS3 extra: the cutoff is exclusive", "job_agent/filter.py",
+     '    eligible = [r for r in records if r["fate"] == "kept" and r["score"] >= rank["shortlist_min"]]',
+     '    eligible = [r for r in records if r["fate"] == "kept" and r["score"] > rank["shortlist_min"]]'),
+    ("JS3 extra: duplicates keep the oldest copy", "job_agent/filter.py",
+     "        if key not in newest or _newer(record, newest[key]):",
+     "        if key not in newest or _newer(newest[key], record):"),
+    ("JS3 extra: a missing employment type passes", "job_agent/filter.py",
+     '        return _result("R1", "cannot_tell", None, "the employment type is missing",',
+     '        return _result("R1", "pass", None, "the employment type is missing",'),
+    ("JS3 extra: topic points are not capped", "job_agent/filter.py",
+     '              min(rank["topic_cap"], rank["per_topic_group"] * groups))]',
+     '              rank["per_topic_group"] * groups)]'),
+    ("JS3 extra: a posting with no description is judged", "job_agent/filter.py",
+     '    if not reason and not description.strip():\n        reason = "the posting has no description"\n',
+     '    if False:\n        reason = "the posting has no description"\n'),
+    ("JS3 extra: the company words are ignored", "job_agent/filter.py",
+     '            company = next((w for w in rules["years_company_words"] if _has_word(sentence, w)), None)',
+     "            company = None"),
+    ("JS3 extra: a season before the earliest start passes", "job_agent/filter.py",
+     "    return first > limit[1]", "    return first < limit[1]"),
 ]
 
 
