@@ -1,9 +1,11 @@
-"""Command line: python3 -m job_agent run | run-one | check-resume.
+"""Command line: python3 -m job_agent run | run-one | filter | check-resume.
 
 run      the loop over the boards in boards.json (GATE.md). Exit 0 finished, 1 incomplete,
          4 budget-exhausted, 2 broken input, 3 refused.
 run-one  layer 1's watch of the one OpenAI board (CONTRACT.md), kept as it was. Exit 0 done,
          1 no answer, 2 broken input, 3 refused.
+filter   layer 3 (JS3): FILTER.md's filter on the newest saved answer of each board, offline. Writes
+         js3/filter-run/<UTC time>/ (verdicts.json, report.md). Exit 0 done, 2 broken input, 3 refused.
 """
 
 from __future__ import annotations
@@ -12,7 +14,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import CONTRACT_VERSION, claude_judge, gate, loop, policy, resume, watch
+from . import CONTRACT_VERSION, claude_judge, filter_run, gate, loop, policy, resume, watch
+from . import filter as filter_mod
 from .errors import BrokenInput, NoAnswer, Refused
 from .judges import PROMPTS, Judges
 
@@ -57,6 +60,13 @@ def main(argv=None) -> int:
     one.add_argument("--prompt", type=Path, default=PROMPTS / "baseline.txt", help="the Claude judge's prompt contract")
     one.add_argument("--model", default=claude_judge.DEFAULT_MODEL, help="the Claude judge's model")
 
+    flt = commands.add_parser("filter", help="layer 3: FILTER.md's filter on the newest saved answer of each board")
+    flt.add_argument("--runs", type=Path, default=DEFAULT_RUNS, help="the run folders to take saved answers from")
+    flt.add_argument("--boards", type=Path, default=DEFAULT_BOARDS)
+    flt.add_argument("--resume", type=Path, default=DEFAULT_RESUME, help="the profile whose facts the filter reads")
+    flt.add_argument("--rules", type=Path, default=filter_mod.FILTER_MD, help="the filter document (Section 7 is read)")
+    flt.add_argument("--out", type=Path, default=filter_run.DEFAULT_OUT, help="where the run folder is written")
+
     check = commands.add_parser("check-resume", help="validate a résumé and run nothing else")
     check.add_argument("path", type=Path, nargs="?", default=DEFAULT_RESUME)
     args = parser.parse_args(argv)
@@ -67,6 +77,8 @@ def main(argv=None) -> int:
             return 0
         if args.command == "run-one":
             return _run_one(args)
+        if args.command == "filter":
+            return _filter(args)
         return _run_loop(args)
     except Refused as exc:
         print(exc, file=sys.stderr)
@@ -91,6 +103,18 @@ def _run_loop(args) -> int:
                        files=files_policy(), judges=Judges(prompt=args.prompt, model=args.model), budgets=budgets,
                        approve=args.approve or None, replay=args.replay)
     return summary["exit_code"]
+
+
+def _filter(args) -> int:
+    profile = resume.load(args.resume)
+    shown = str(args.resume.resolve()).replace(str(Path.home()), "~")
+    result = filter_run.run(runs_root=args.runs, boards_path=args.boards, out_root=args.out, rules_path=args.rules,
+                            profile=profile, profile_label=shown)
+    fates = result["summary"]["fates"]
+    print(f"filter run {result['meta']['run_id']}: {result['summary']['postings']} postings, {fates.get('kept', 0)} "
+          f"kept, {fates.get('rejected', 0)} rejected, {fates.get('cannot_tell', 0)} cannot tell; shortlist "
+          f"{result['summary']['shortlist_size']}. Wrote {result['out']}")
+    return 0
 
 
 def _run_one(args) -> int:
