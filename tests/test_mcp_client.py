@@ -226,18 +226,35 @@ class CommittedTranscriptTest(unittest.TestCase):
                 comparison = client.compare_with_server_log(log, REPO / log[0]["server_transcript"])
                 self.assertTrue(comparison["match"], (path.name, comparison["details"]))
 
-    def test_the_committed_claude_code_server_transcripts(self):
+    def test_the_committed_claude_code_run(self):
+        """Recomputed from the saved files: the server answered every request once, and the tool result Claude
+        Code passed on is the text the server sent. The two checks the run recorded as failed are the ones whose
+        expectations the real client did not meet (an extra "source" field; server/discover before initialize)."""
         for path in sorted(COMMITTED.glob("*-claude-code-server.jsonl")):
             entries = read_jsonl(path)
-            self.assertEqual(entries[0]["event"], "start")
-            self.assertIn("event", entries[-1])
+            self.assertEqual((entries[0]["event"], entries[-1]["event"]), ("start", "end"))
             sent = [json.loads(e["text"]) for e in entries if e.get("dir") == "in"]
             answers = [json.loads(e["text"]) for e in entries if e.get("dir") == "out"]
             for message in sent:
                 if "id" in message:
                     self.assertEqual(len([a for a in answers if a.get("id") == message["id"]]), 1, message)
-            run = json.loads(path.with_name(path.name.replace("-server.jsonl", "-run.json")).read_text())
-            self.assertEqual([c["check"] for c in run["checks"] if not c["passed"]], [])
+            stem = path.name[:-len("-server.jsonl")]
+            events = read_jsonl(path.with_name(stem + "-events.jsonl"))
+            call = next(m for m in sent if m.get("method") == "tools/call")
+            served = next(a for a in answers if a.get("id") == call["id"])["result"]["content"][0]["text"]
+            passed_on = claude_run.blocks(events, "tool_result")
+            self.assertEqual([claude_run._text(b) for b in passed_on], [served])
+            init = json.loads(path.with_name(stem + "-init.json").read_text(encoding="utf-8"))
+            self.assertEqual(init["tools"], [claude_run.TOOL])
+            self.assertEqual([(s["name"], s["status"]) for s in init["mcp_servers"]], [("job-search-agent", "connected")])
+            run = json.loads(path.with_name(stem + "-run.json").read_text(encoding="utf-8"))
+            failed = {c["check"]: c["seen"] for c in run["checks"] if not c["passed"]}
+            self.assertLessEqual(set(failed), {"Claude Code connected to our server, and to no other",
+                                               "the server saw initialize, then notifications/initialized, then "
+                                               "tools/list, then tools/call"})
+            methods = [m.get("method") for m in sent]
+            self.assertEqual([m for m in methods if m != "server/discover"][:4],
+                             ["initialize", "notifications/initialized", "tools/list", "tools/call"])
 
 
 if __name__ == "__main__":

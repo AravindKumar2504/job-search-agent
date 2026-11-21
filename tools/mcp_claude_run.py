@@ -72,10 +72,14 @@ def command(binary, config: dict, model: str = MODEL) -> list:
 
 
 def scrub(text: str, folder: str = None, repo: Path = REPO) -> str:
-    """The temporary folder, the repo and the home folder written as placeholders."""
-    for path in ([folder, os.path.realpath(folder)] if folder else []):
+    """The temporary folder, the repo and the home folder written as placeholders, the longest spelling first.
+
+    (The run of 2026-11-21 replaced the shorter spelling first, so its init event shows "/private" before the
+    placeholder: on macOS the temporary folder /var/... is reached through /private/var/....)
+    """
+    for path in (sorted({folder, os.path.realpath(folder)}, key=len, reverse=True) if folder else []):
         text = text.replace(path, TEMP_PLACEHOLDER)
-    for path in (str(repo), os.path.realpath(str(repo))):
+    for path in sorted({str(repo), os.path.realpath(str(repo))}, key=len, reverse=True):
         text = text.replace(path, "<repo>")
     home = str(Path.home())
     return text.replace(home, "~") if len(home) > 1 else text
