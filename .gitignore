@@ -5,6 +5,9 @@ private/
 *.private.*
 *.real.*
 transcripts/
+# One exception: JS3's MCP protocol transcripts (js3/mcp/) are course evidence about a fictional persona and
+# public postings, not conversations, so they are kept.
+!js3/mcp/transcripts/
 *.docx
 *.pdf
 .env
