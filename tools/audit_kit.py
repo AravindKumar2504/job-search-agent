@@ -96,11 +96,13 @@ def card(number: int, posting: dict, board: str, rules: dict) -> str:
     return "\n".join(lines)
 
 
-def build(run_dir: Path, out_root: Path, seed: int = DEFAULT_SEED, **sizes) -> Path:
-    run_dir = Path(run_dir)
-    data = json.loads((run_dir / "verdicts.json").read_text(encoding="utf-8"))
-    rules = flt.load_rules()
-    postings = {}
+def saved_postings(data: dict) -> dict:
+    """{(board, posting id): (the posting in the filter's fields, the board's own job as saved)} for one filter run.
+
+    Read from each board's saved answer, which must still match the SHA-256 the filter run recorded. Also used by
+    tools/claims_kit.py (which quotes the board's own fields) and tools/heldout_kit.py.
+    """
+    out = {}
     for source in data["meta"]["sources"]:
         if not source.get("run"):
             continue
@@ -108,8 +110,17 @@ def build(run_dir: Path, out_root: Path, seed: int = DEFAULT_SEED, **sizes) -> P
         body = gzip.decompress(path.read_bytes()) if path.suffix == ".gz" else path.read_bytes()
         if hashlib.sha256(body).hexdigest() != source["sha256"]:
             raise SystemExit(f"{path} no longer matches the SHA-256 the filter run recorded")
-        for p in providers.read(source["system"], 200, body):
-            postings[(source["key"], p["id"])] = p
+        raw_jobs = providers._jobs(source["system"], json.loads(body.decode("utf-8")))
+        for posting, raw in zip(providers.read(source["system"], 200, body), raw_jobs):
+            out[(source["key"], posting["id"])] = (posting, raw)
+    return out
+
+
+def build(run_dir: Path, out_root: Path, seed: int = DEFAULT_SEED, **sizes) -> Path:
+    run_dir = Path(run_dir)
+    data = json.loads((run_dir / "verdicts.json").read_text(encoding="utf-8"))
+    rules = flt.load_rules()
+    postings = {key: posting for key, (posting, _) in saved_postings(data).items()}
     drawn = draw(data["records"], seed, **sizes)
     random.Random(seed + 1).shuffle(drawn)
     out = Path(out_root) / data["meta"]["run_id"]
