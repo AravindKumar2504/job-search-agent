@@ -56,9 +56,11 @@ def newest_answers(runs_root: Path, boards: list) -> list:
             body = gzip.decompress(body_path.read_bytes()) if body_path.suffix == ".gz" else body_path.read_bytes()
             if hashlib.sha256(body).hexdigest() != meta["sha256"]:
                 raise BrokenInput(f"{body_path} does not match the SHA-256 its meta file records")
-            source.update(run=run.name, file=str(body_path.relative_to(Path(runs_root).parent))
-                          if Path(runs_root).parent in body_path.parents else str(body_path),
-                          sha256=meta["sha256"], why_none=None, body=body)
+            try:  # shown relative to the repo when the runs are inside it, else as a full path
+                shown = str(body_path.resolve().relative_to(REPO))
+            except ValueError:
+                shown = str(body_path.resolve())
+            source.update(run=run.name, file=shown, sha256=meta["sha256"], why_none=None, body=body)
             break
         if source["run"]:  # other runs that saved the very same bytes for this board
             source["same_as"] = [r.name for r in runs if r.name != source["run"] and any(
