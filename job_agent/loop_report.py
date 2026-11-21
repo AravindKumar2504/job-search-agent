@@ -129,6 +129,10 @@ def _over(b) -> dict:
 def _posting(b, p, verdicts) -> dict:
     v = verdicts.get((b.key, p["id"]), {})
     claude = v.get("claude")
+    if v.get("cannot_tell"):  # FILTER.md Section 3: a posting with no title is judged by neither judge
+        return {"id": p["id"], "title": p["title"] or "(no title)", "locations": locations(p),
+                "jobUrl": p.get("jobUrl"), "rule_verdict": f"I cannot tell ({v['cannot_tell']})",
+                "claude_verdict": "not asked", "rule": v.get("rule"), "claude": None, "cannot_tell": v["cannot_tell"]}
     return {
         "id": p["id"], "title": p["title"], "locations": locations(p), "jobUrl": p.get("jobUrl"),
         "rule_verdict": (v.get("rule") or {}).get("verdict", "missing"),

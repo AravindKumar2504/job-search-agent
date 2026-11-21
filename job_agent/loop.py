@@ -304,6 +304,8 @@ def _judge(boards, resume, judges, run_dir, files, trace, budgets, elapsed, stop
     verdicts = {}
     for board, posting, why in queue:
         verdicts[(board.key, posting["id"])] = {"rule": judges.rule_verdict(posting, resume), "why": why}
+        if posting.get("_cannot_tell"):  # FILTER.md Section 3: judged by nobody, never sent to Claude
+            verdicts[(board.key, posting["id"])]["cannot_tell"] = posting["_cannot_tell"]
     if queue:
         trace.add("judge_rule", postings=len(queue), relevant=sum(
             1 for v in verdicts.values() if v["rule"]["verdict"] == "relevant"))
@@ -311,6 +313,10 @@ def _judge(boards, resume, judges, run_dir, files, trace, budgets, elapsed, stop
     calls, made, stopped = 0, set(), None
     for board, posting, why in queue:
         key = (board.key, posting["id"])
+        if posting.get("_cannot_tell"):
+            trace.add("decision", board=board.key, posting_id=posting["id"], action="not sent to Claude",
+                      why=f"{posting['_cannot_tell']}: I cannot tell (FILTER.md, Section 3)")
+            continue
         if stopped is None and calls >= budgets.claude_calls:
             stopped = BudgetStop("claude_calls", f"the budget of {budgets.claude_calls} Claude calls was used up")
         if stopped is None and elapsed() >= budgets.seconds:

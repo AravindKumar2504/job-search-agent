@@ -4,6 +4,10 @@ A board is a system and a name. The URL is built here from one fixed template pe
 policy.check_request checks it before any connection opens. Each answer is read into the fields
 the rule reads (Ashby's names), by the mapping GATE.md writes down. A broken answer raises
 Unverified, and the loop then keeps that board's state exactly as it was (GATE.md, Error policy).
+
+Since FILTER.md v1.0 (Section 3, 2026-11-20), one posting with no title no longer makes the whole board
+unverified: it is kept with "_cannot_tell" saying why, and the rest of the board is read. A posting with no id, or
+an answer in which no posting has a title, is still a broken answer, because the board's state is kept by ids.
 """
 
 from __future__ import annotations
@@ -11,6 +15,7 @@ from __future__ import annotations
 import html
 import json
 import re
+from datetime import datetime, timezone
 
 from .errors import BrokenInput, Unverified
 
@@ -32,6 +37,10 @@ MAPPED_FROM = {
               "location": "categories.allLocations (or categories.location), with country",
               "descriptionPlain": "descriptionPlain, then each of lists (heading and items), then additionalPlain"},
 }
+
+# The posting date the JS3 filter uses to order ties and pick the newest duplicate (FILTER.md, Sections 1 and 6).
+DATES_FROM = {"ashby": "publishedAt", "greenhouse": "first_published (or updated_at)",
+              "lever": "createdAt (milliseconds, written as UTC)"}
 
 US_STATES = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California", "CO": "Colorado",
@@ -76,11 +85,14 @@ def read(system: str, status: int, body: bytes) -> list:
         if not isinstance(raw, dict):
             raise Unverified(f"job {index} is not an object")
         posting = MAPPERS[system](raw)
-        for key in ("id", "title"):
-            value = posting.get(key)
-            if not isinstance(value, str) or not value.strip():
-                raise Unverified(f"job {index} has no {key}")
+        if not isinstance(posting.get("id"), str) or not posting["id"].strip():
+            raise Unverified(f"job {index} has no id")
+        if not isinstance(posting.get("title"), str) or not posting["title"].strip():
+            posting["title"] = ""
+            posting["_cannot_tell"] = "the posting has no title"
         postings.append(posting)
+    if all(p.get("_cannot_tell") for p in postings):
+        raise Unverified("no posting in the answer has a title")
     return postings
 
 
@@ -115,6 +127,7 @@ def _greenhouse(raw: dict) -> dict:
         "secondaryLocations": [{"location": p, "address": postal(p)} for p in others],
         "workplaceType": None,
         "descriptionPlain": html_text(html.unescape(raw.get("content") or "")),
+        "publishedAt": raw.get("first_published") or raw.get("updated_at"),
     }
 
 
@@ -137,6 +150,7 @@ def _lever(raw: dict) -> dict:
         "workplaceType": raw.get("workplaceType"),
         "_us_remote": raw.get("workplaceType") == "remote" and country == "US",
         "descriptionPlain": _lever_text(raw),
+        "publishedAt": _from_milliseconds(raw.get("createdAt")),
     }
 
 
@@ -203,3 +217,10 @@ def _text_id(value):
     if isinstance(value, int):
         return str(value)
     return value
+
+
+def _from_milliseconds(value):
+    """Lever's createdAt (milliseconds since 1970) as an ISO date in UTC; anything else is no date."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return datetime.fromtimestamp(value / 1000, tz=timezone.utc).isoformat(timespec="seconds")

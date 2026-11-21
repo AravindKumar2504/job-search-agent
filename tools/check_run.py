@@ -3,8 +3,9 @@
 It reads only what the run saved, each board's raw answers and their meta files, and what the run
 claims in report.json. It never imports the agent's code. For each board on the report it takes the
 last saved answer and decides, by its own reading, whether the board could have been read: HTTP 200,
-JSON, and a non-empty list of postings that each have an id and a title (a "jobs" list on Ashby and
-Greenhouse, a top-level list on Lever). Then it compares:
+JSON, and a non-empty list of postings that each have an id, at least one of them with a title (a "jobs"
+list on Ashby and Greenhouse, a top-level list on Lever; since FILTER.md v1.0, one posting with no title no longer
+makes the answer unreadable). Then it compares:
 
 1. the board's status in the report with that reading (a board reported "read" whose saved answer
    could not have been read is the finished wrong answer GATE.md describes);
@@ -39,11 +40,14 @@ def readable(system: str, status, body: bytes):
     if not items:
         return False, "the saved answer's list of postings is empty"
     title_key = "text" if system == "lever" else "title"
-    ids = []
+    ids, titled = [], 0
     for item in items:
-        if not isinstance(item, dict) or item.get("id") in (None, "") or not item.get(title_key):
-            return False, "a saved posting has no id or no title"
+        if not isinstance(item, dict) or item.get("id") in (None, ""):
+            return False, "a saved posting has no id"
         ids.append(str(item["id"]))
+        titled += 1 if isinstance(item.get(title_key), str) and item[title_key].strip() else 0
+    if not titled:  # FILTER.md Section 3 (2026-11-20): one posting with no title no longer fails the answer
+        return False, "no saved posting has a title"
     return True, ids
 
 
