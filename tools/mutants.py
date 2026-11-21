@@ -3,8 +3,9 @@
 A suite that still passes when the code is broken proves nothing. Each mutant below swaps one piece
 of code for a plausible mistake. The first entries are the contract's "Wrong versions" (W1 to W4);
 the ones marked "extra" are further mistakes the tests also have to catch. The entries marked "JS3" are
-FILTER.md v1.0's wrong versions (Section 4, W1 to W7) and further mistakes in the JS3 filter. The copy lives in a
-temporary folder, so the repo itself is never touched. A mutant is "caught" when a test fails.
+FILTER.md v1.0's wrong versions (Section 4, W1 to W7) and further mistakes in the JS3 filter; the entries marked
+"MCP" are mistakes in the JS3 MCP server (job_agent/mcp_server.py). The copy lives in a temporary folder, so the
+repo itself is never touched. A mutant is "caught" when a test fails.
 
 Usage (from the repo root):  python3 tools/mutants.py
 Exit 0 when every mutant is caught, 1 when one survives, 2 when the unbroken copy fails or a
@@ -25,7 +26,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 # runs/: the rule's tests read the real baseline response; labels/ and tools/: the selection and label tests;
 # experiment/: the Claude judge's tests copy Claude Code's real init event from a saved call.
-COPIED = ("job_agent", "tests", "persona", "runs", "labels", "tools", "prompts", "experiment")
+# js3/mcp: the MCP client tests run the copied lesson 8 server and read the committed transcripts.
+COPIED = ("job_agent", "tests", "persona", "runs", "labels", "tools", "prompts", "experiment", "js3/mcp")
 COPIED_FILES = ("GATE.md", "boards.json", "FILTER.md")  # test_gate.py reads GATE.md; the JS3 filter reads FILTER.md
 
 # (label, file, old text, new text)
@@ -233,6 +235,26 @@ MUTANTS = [
      "            company = None"),
     ("JS3 extra: a season before the earliest start passes", "job_agent/filter.py",
      "    return first > limit[1]", "    return first < limit[1]"),
+    # JS3 step 2 item 3: mistakes in the MCP server (2026-11-21).
+    ("MCP: ready set on initialize, so the initialized notification is skipped", "job_agent/mcp_server.py",
+     "        self.initialized = True\n        # Version negotiation",
+     "        self.initialized = True\n        self.ready = True\n        # Version negotiation"),
+    ("MCP: a tool error sent with isError false (a failure dressed as a result)", "job_agent/mcp_server.py",
+     '    return {"content": [{"type": "text", "text": text}], "isError": True}',
+     '    return {"content": [{"type": "text", "text": text}], "isError": False}'),
+    ("MCP: an extra argument is accepted (additionalProperties ignored)", "job_agent/mcp_server.py",
+     '    if extra:\n        problems.append("not allowed: "', '    if False:\n        problems.append("not allowed: "'),
+    ("MCP: the transcript guard compares path strings (a sibling folder passes)", "job_agent/mcp_server.py",
+     "    if path.parent.resolve() != root.resolve():",
+     "    if not str(path.parent.resolve()).startswith(str(root.resolve())):"),
+    ("MCP: a status line on stdout", "job_agent/mcp_server.py",
+     "        reason = serve(Server(repo), stdin or sys.stdin.buffer, stdout or sys.stdout.buffer, transcript)",
+     '        print("job-search-agent MCP server ready", flush=True)\n'
+     "        reason = serve(Server(repo), stdin or sys.stdin.buffer, stdout or sys.stdout.buffer, transcript)"),
+    ("MCP: a transcript written without being asked for", "job_agent/mcp_server.py",
+     "    transcript = None\n    if args.transcript is not None:",
+     '    transcript = None\n    args.transcript = args.transcript or "js3/mcp/transcripts/default.jsonl"\n'
+     "    if args.transcript is not None:"),
 ]
 
 
