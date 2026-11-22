@@ -40,6 +40,23 @@ DEFAULT_SEED = 20261121
 STATUS_WORDS = ("citizen", "U.S. person", "US person", "clearance", "green card", "permanent resident", "sponsor",
                 "sponsorship", "visa", "export control", "authorized to work", "work authorization", "ITAR")
 FIRST_WORDS = 150
+# The filter's sentence splitter ends a sentence after these (a known v1.1 item). On 2026-11-22 that hid
+# "U.S. Person Required" from audit card 17, a line R5 had read, so cards keep these whole: cards show facts.
+ABBREVIATIONS = ("U.S.", "e.g.", "i.e.")
+
+
+def card_sentences(text: str) -> list:
+    """The description split for a card: the filter's own splitter, but never inside U.S., e.g. or i.e."""
+    guarded = text or ""
+    for i, abbr in enumerate(ABBREVIATIONS):
+        guarded = guarded.replace(abbr, f"\x00{i}\x00")
+    sentences, _ = flt.split_sentences(guarded)
+    out = []
+    for s in sentences:
+        for i, abbr in enumerate(ABBREVIATIONS):
+            s = s.replace(f"\x00{i}\x00", abbr)
+        out.append(s)
+    return out
 
 
 def draw(records: list, seed: int, n_random: int = 30, n_close_kept: int = 8, n_close_rejected: int = 7,
@@ -69,11 +86,14 @@ def draw(records: list, seed: int, n_random: int = 30, n_close_kept: int = 8, n_
 
 
 def card(number: int, posting: dict, board: str, rules: dict) -> str:
-    sentences, _ = flt.split_sentences(posting.get("descriptionPlain") or "")
-    flat = [re.sub(r"^[-•*–]\s+", "", _flat(s).strip()) for s in sentences]  # the posting's own bullets go
+    sentences, _ = flt.split_sentences(posting.get("descriptionPlain") or "")  # the filter's own split: topics
+    shown = card_sentences(posting.get("descriptionPlain") or "")  # whole lines for the facts a person reads
+    flat = [re.sub(r"^[-•*–]\s+", "", _flat(s).strip()) for s in shown]  # the posting's own bullets go
     years = [s for s in flat if YEARS.search(s)]
     start = [s for s in flat if _has_word(s, "start") or any(p.lower() in s.lower() for p in rules["start_phrases"])]
-    status = [s for s in flat if any(_has_word(s, w) for w in STATUS_WORDS)]
+    # Every line R5's own phrases match (as R5 reads them: lower case, anywhere), so a card never hides what R5 read.
+    r5 = [p.lower() for key in ("status_us_person_phrases", "status_sponsorship_phrases") for p in rules.get(key, [])]
+    status = [s for s in flat if any(_has_word(s, w) for w in STATUS_WORDS) or any(p in s.lower() for p in r5)]
     topics = flt.topic_groups(sentences, rules)
     words = (posting.get("descriptionPlain") or "").split()
     places = [t for t, _ in flt._places(posting) if isinstance(t, str) and t.strip()]

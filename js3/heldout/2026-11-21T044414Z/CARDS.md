@@ -90,8 +90,7 @@
 
 **Sentences about status, sponsorship or clearance:**
 
-- You must be independently authorized to work in the U.S.
-- We are unable to sponsor or take over sponsorship of an employment visa for this role, at this time.
+- You must be independently authorized to work in the U.S. We are unable to sponsor or take over sponsorship of an employment visa for this role, at this time.
 
 **Sentences with a topic word and an action word:**
 
@@ -225,8 +224,8 @@
 
 **Sentences about status, sponsorship or clearance:**
 
-- security clearance, or eligibility and willingness to obtain one, is required
-- security clearance, or eligibility and willingness to obtain one, is a plus but not required
+- For USG: An active U.S. security clearance, or eligibility and willingness to obtain one, is required
+- For all other roles: An active U.S. security clearance, or eligibility and willingness to obtain one, is a plus but not required
 
 **Sentences with a topic word and an action word:**
 
@@ -327,7 +326,7 @@
 
 **Sentences about status, sponsorship or clearance:**
 
-- export control laws and regulations, candidates for this role may need to meet certain legal status requirements as provided in those laws and regulations.
+- To comply with U.S. export control laws and regulations, candidates for this role may need to meet certain legal status requirements as provided in those laws and regulations.
 
 **Sentences with a topic word and an action word:**
 
@@ -360,7 +359,7 @@
 
 **Sentences about status, sponsorship or clearance:**
 
-- none
+- To comply with a U.S. government contract, applicants for this position must be U.S. citizens with the ability to obtain and maintain a Tier 4 (High Risk Public Trust) background investigation.
 
 **Sentences with a topic word and an action word:**
 
@@ -727,7 +726,7 @@
 
 **Sentences about status, sponsorship or clearance:**
 
-- export control laws and regulations, candidates for this role may need to meet certain legal status requirements as provided in those laws and regulations.
+- To comply with U.S. export control laws and regulations, candidates for this role may need to meet certain legal status requirements as provided in those laws and regulations.
 
 **Sentences with a topic word and an action word:**
 
@@ -961,7 +960,7 @@
 
 **Sentences about status, sponsorship or clearance:**
 
-- export control laws and regulations, candidates for this role may need to meet certain legal status requirements as provided in those laws and regulations.
+- To comply with U.S. export control laws and regulations, candidates for this role may need to meet certain legal status requirements as provided in those laws and regulations.
 
 **Sentences with a topic word and an action word:**
 

@@ -84,5 +84,22 @@ class AuditKitTest(unittest.TestCase):
             self.assertIn("(APIs)", cards[n - 1])
 
 
+class CardKeepsStatusLinesTest(unittest.TestCase):
+    """2026-11-22: the filter's splitter cut "U.S. Person Required" at "U.S.", so audit card 17 showed no status line
+    although R5 had read one. A card must show, whole, every line R5's phrases match."""
+
+    def test_status_lines_cut_at_us_are_shown_whole(self):
+        from job_agent import filter as flt
+        posting = {"id": "p1", "title": "Software Engineer", "jobUrl": "https://example.test/p1",
+                   "location": "New York, NY", "employmentType": "FullTime", "publishedAt": "2026-11-20",
+                   "descriptionPlain": "What We Require\nU.S. Person Required\nMust be graduating in Spring 2027\n"
+                                       "To comply with a U.S. government contract, applicants must be U.S. citizens."}
+        text = audit_kit.card(1, posting, "lever-test", flt.load_rules())
+        status = text.split("**Sentences about status, sponsorship or clearance:**")[1].split("**Sentences with")[0]
+        self.assertIn("- U.S. Person Required", status)
+        self.assertIn("applicants must be U.S. citizens.", status)
+        self.assertNotIn("- none", status)
+
+
 if __name__ == "__main__":
     unittest.main()
