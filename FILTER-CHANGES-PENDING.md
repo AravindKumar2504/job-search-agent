@@ -1,5 +1,9 @@
 # Changes pending for FILTER.md v1.1
 
+**Status after FILTER.md v1.1 (2026-11-22, `5dff01f`):** item 1 adopted (growth, revenue and customers dropped), and
+the splitter now keeps "U.S.", "e.g." and "i.e." inside a sentence; items 3, 5 and 6 are written into v1.1; items 2
+and 4 are left out, since neither fired on any of the 1,509 postings. The text below is kept as it was found.
+
 Found by Claude Code while building and running FILTER.md v1.0 (2026-11-20 and 21). FILTER.md v1.0 itself is not
 edited: version 1.0 stays as committed in 66e26d9, and each item below waits for a dated v1.1 entry. The engine
 implements v1.0 exactly as written, including the parts flagged here. Every count comes from the filter run

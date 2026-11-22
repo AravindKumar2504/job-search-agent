@@ -43,3 +43,20 @@ would still agree with him on another day's postings. Two predictions held only 
   (keep or drop).
 - A call made from these results turns the held-out set into development data from then on (held-out `CHANGES.md`); a
   later claim about a change would need a new held-out set.
+
+## FILTER.md v1.1 on the whole run
+
+Aravind made the three calls on 2026-11-22 (cutoff 50, an export-control line costs 10 points, "build systems"
+dropped), and FILTER.md v1.1 adds them with Claude Code's two implementation changes (`5dff01f`). The filter run
+`js3/filter-run/2026-11-22T084738Z/` applies v1.1 to the same 1,509 saved postings. This is development data, not a
+new measurement: no labels are involved.
+
+- **No fate changes:** 99 kept, 1,409 rejected and 1 "I cannot tell", the same postings as v1.0.
+- **15 kept scores changed:** 9 export-control postings lost 10 points, and 6 postings lost the 5 points "build systems"
+  gave them.
+- **91 of the 99 kept postings reach the cutoff of 50** (v1.0: 50 reached 60). The 8 that do not are all export-control
+  postings.
+- **The top 10 lost the two postings behind Aravind's calls:** EDA Cloud & Developer Infrastructure Engineer (its
+  export-control line, 70 to 60) and Software Engineer, Ads Integrity ("build systems", 65 to 60). Full Stack Software
+  Engineer, Codex and Full Stack Software Engineer, ChatGPT ImageGen took their places.
+
