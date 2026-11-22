@@ -17,3 +17,7 @@ Aravind judged the 30 rebuilt cards in chat on 2026-11-22 (compact cards: every 
 ## 2026-11-22: answers opened for the pre-registered experiments
 
 `tools/heldout_experiments.py` opened `sealed/answers.json` at 2026-11-22T083619Z (UTC), after the list of changes was committed (`1c9a37e`), and measured each run once (`js3/score/EXPERIMENTS.md`). If a result here leads to adopting a change, this set is development data from then on, and a later claim about a change needs a new held-out set.
+
+## 2026-11-22: this set is development data from now on
+
+After seeing the measurement, Aravind made three calls for FILTER.md v1.1 (cutoff 50, an export-control line costs 10 points, "build systems" dropped; `5dff01f`). Since those choices used this set's results, the set has guided a change: any later claim about a change needs a new held-out set.
