@@ -92,11 +92,16 @@ def check_profile(profile: dict) -> None:
         raise BrokenInput(f"the profile lacks {', '.join(missing)}, which the filter reads")
 
 
-def split_sentences(text: str) -> tuple:
+def split_sentences(text: str, keeps=()) -> tuple:
     """(sentences, merges): the agent's split, with month abbreviations kept with their year (Section 6, item 1).
 
-    merges lists each sentence the fix kept together, so a report can count how often it fired.
+    merges lists each sentence the fix kept together, so a report can count how often it fired. keeps lists
+    abbreviations the split must not end a sentence after (Section 7's optional "splitter_keeps", a v1.1
+    candidate; v1.0 has none, so v1.0 splits after "U.S." as it always did).
     """
+    guards = {f"\x00{i}\x00": abbr for i, abbr in enumerate(keeps or ())}
+    for mark, abbr in guards.items():
+        text = (text or "").replace(abbr, mark)
     pieces, merges, start = [], [], 0
     for sep in _SPLIT.finditer(text or ""):
         pieces.append((text[start:sep.start()], sep.group()))
@@ -112,6 +117,9 @@ def split_sentences(text: str) -> tuple:
         out.append((piece, sep))
     sentences = [p for p, _ in out if p.strip()]
     merges = [m for m in merges if any(m in s for s in sentences)]
+    for mark, abbr in guards.items():
+        sentences = [s.replace(mark, abbr) for s in sentences]
+        merges = [m.replace(mark, abbr) for m in merges]
     return sentences, merges
 
 
@@ -133,7 +141,7 @@ def judge(posting: dict, profile: dict, rules: dict, board: str = None) -> dict:
     if reason:  # FILTER.md Section 2, "I cannot tell" for a whole posting; Section 3 for the missing field
         record.update(fate="cannot_tell", cannot_tell=reason)
         return record
-    sentences, merges = split_sentences(description)
+    sentences, merges = split_sentences(description, rules.get("splitter_keeps", ()))
     record["section6"]["dec_merges"] = merges
     checks = [r1_employment(posting, rules), r2_location(posting, profile), r3_level(title, rules),
               r4_role(title, rules), r5_status(description, sentences, profile, rules, record),
@@ -354,6 +362,8 @@ def score(record: dict, rules: dict) -> tuple:
     for flag in record["flags"]:
         if flag["penalty"]:
             terms.append((f"{flag['rule']}: {flag['why']}", flag["penalty"]))
+    if record.get("cautions") and rank.get("caution_penalty"):  # optional, a v1.1 candidate; v1.0 has none
+        terms.append((f"caution: {rules['caution_phrase']}", rank["caution_penalty"]))
     return sum(points for _, points in terms), terms
 
 
