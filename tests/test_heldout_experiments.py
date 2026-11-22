@@ -51,11 +51,11 @@ class VariantsTest(unittest.TestCase):
 
 class MetricsTest(unittest.TestCase):
     def test_fate_and_cutoff_agreement_by_pool(self):
-        rows = [{"pool": "kept", "his": "Keep", "fate": "kept", "score": 55},
-                {"pool": "kept", "his": "Reject", "fate": "kept", "score": 65},
-                {"pool": "kept", "his": "?", "fate": "kept", "score": 70},
-                {"pool": "rejected", "his": "Reject", "fate": "rejected", "score": None},
-                {"pool": "rejected", "his": "Keep", "fate": "rejected", "score": None}]
+        rows = [{"pool": "random kept", "his": "Keep", "fate": "kept", "score": 55},
+                {"pool": "random kept", "his": "Reject", "fate": "kept", "score": 65},
+                {"pool": "random kept", "his": "?", "fate": "kept", "score": 70},
+                {"pool": "random rejected", "his": "Reject", "fate": "rejected", "score": None},
+                {"pool": "random rejected", "his": "Keep", "fate": "rejected", "score": None}]
         m = hx.metrics(rows, 60)
         self.assertEqual((m["kept"]["n"], m["kept"]["fate_agree"]), (2, 1))
         self.assertEqual((m["rejected"]["n"], m["rejected"]["fate_agree"]), (2, 1))
