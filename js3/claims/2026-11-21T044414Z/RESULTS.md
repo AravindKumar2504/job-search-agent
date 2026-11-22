@@ -35,6 +35,19 @@ Computed by `tools/score_claims.py` from Aravind's labels in LABELS.md (committe
 | 05.8d | Software Engineer, Compute Infrastructure | It describes work in the topic group Developer tools ("developer tools"). | supported |  | insufficient | it names 'developer tools' with an action word, but nothing in it says this is the role's work; it may describe the company |
 | 09.8c | Software Engineer, Ads Integrity | It describes work in the topic group Developer tools ("build systems"). | insufficient | the sentence mentions distributed systems but does not establish that this role involves developer tools or build systems | supported | it names 'build systems' with an action word, and is about the role (the word 'you') |
 
+## Flip checks (FLIP-CHECKS.md, chapter 7)
+
+For each disagreement, Claude Code found the sentence that bears most directly on the claim, after the checker's labels were opened, and Aravind said whether it changed his label. LABELS.md is unchanged.
+
+| Claim | His frozen label | Checker | His label after | His words |
+|---|---|---|---|---|
+| 04.8a | supported | insufficient | supported | "04.8a stays" |
+| 04.8c | supported | insufficient | supported | "04.8c stays" |
+| 05.8d | supported | insufficient | insufficient | "05.8d → I" |
+| 09.8c | insufficient | supported | insufficient | "09.8c stays" |
+
+After the flip checks, the checker agrees with him on 102 of 105 claims (frozen: 101 of 105).
+
 ## Relevance is not entailment: topic claims on kept postings he did not find supported
 
 Every posting here was kept and shortlisted, and each topic group below added to its score. The quoted sentence is relevant (it contains the topic word), but he found that it does not say this role's work is in that group.

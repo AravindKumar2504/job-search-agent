@@ -36,6 +36,24 @@ def read_labels(path: Path) -> dict:
     return rows
 
 
+def read_flip_checks(path: Path) -> dict:
+    """{claim: (label after, his words)} from FLIP-CHECKS.md.
+
+    Chapter 7: for each disagreement, the sentence that would change his label, asked after the checker's labels
+    were opened. LABELS.md is never edited, so agreement is reported both ways.
+    """
+    rows = {}
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not ROW.match(line):
+                continue
+            cells = [c.strip() for c in re.split(r"(?<!\\)\|", line)]
+            # | Claim | Frozen label | Checker | The sentence(s) found | Label after | His words |
+            if len(cells) == 8 and cells[5] in NAMES.values():
+                rows[cells[1]] = (cells[5], cells[6])
+    return rows
+
+
 def published_hash(readme: Path) -> str:
     m = re.search(r"SHA-256 `([0-9a-f]{64})`", readme.read_text(encoding="utf-8"))
     if not m:
@@ -60,7 +78,9 @@ def score(kit: Path) -> dict:
         rows.append({"claim": c["claim"], "posting": c["posting"], "type": c["type"], "group": c.get("group"),
                      "text": c["text"], "his": his, "note": note, "checker": c["label"], "why": c["why"],
                      "agree": his == c["label"]})
-    return {"digest": digest, "rows": rows, "postings": postings}
+    flips = read_flip_checks(kit / "FLIP-CHECKS.md")
+    agree_after = sum(1 for r in rows if flips.get(r["claim"], (r["his"],))[0] == r["checker"])
+    return {"digest": digest, "rows": rows, "postings": postings, "flips": flips, "agree_after": agree_after}
 
 
 def write_results(kit: Path, s: dict) -> str:
@@ -92,6 +112,17 @@ def write_results(kit: Path, s: dict) -> str:
         if not r["agree"]:
             title = postings[r["posting"]]["title"].strip()
             out.append(f"| {r['claim']} | {title} | {r['text']} | {r['his']} | {r['note']} | {r['checker']} | {r['why']} |")
+    if s["flips"]:
+        frozen = {r["claim"]: (r["his"], r["checker"]) for r in rows}
+        out += ["", "## Flip checks (FLIP-CHECKS.md, chapter 7)", "",
+                "For each disagreement, Claude Code found the sentence that bears most directly on the claim, after the "
+                "checker's labels were opened, and Aravind said whether it changed his label. LABELS.md is unchanged.", "",
+                "| Claim | His frozen label | Checker | His label after | His words |", "|---|---|---|---|---|"]
+        for claim, (after, words) in sorted(s["flips"].items()):
+            his, chk = frozen.get(claim, ("", ""))
+            out.append(f"| {claim} | {his} | {chk} | {after} | {words} |")
+        out += ["", f"After the flip checks, the checker agrees with him on {s['agree_after']} of {len(rows)} claims "
+                f"(frozen: {agree} of {len(rows)})."]
     topic_i = [r for r in rows if r["type"] == 8 and r["his"] != "supported"]
     out += ["", "## Relevance is not entailment: topic claims on kept postings he did not find supported", "",
             "Every posting here was kept and shortlisted, and each topic group below added to its score. The quoted "

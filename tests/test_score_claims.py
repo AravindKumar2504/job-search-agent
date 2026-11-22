@@ -55,6 +55,20 @@ class ScoreClaimsTest(unittest.TestCase):
             self.assertIn("| insufficient | supported | 1 |", text)
             self.assertIn("| 01.8a | Software Engineer, X (65) | Developer tools | build is a verb here |", text)
 
+    def test_flip_checks_are_reported_beside_the_frozen_labels(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            kit = build(Path(tmp), ROWS)
+            (kit / "FLIP-CHECKS.md").write_text(
+                "| Claim | Frozen label | Checker | The sentence(s) found | Label after | His words |\n|---|---|---|---|---|---|\n"
+                "| 01.8a | insufficient | supported | \"Create tooling for developers.\" | supported | \"01.8a -> S\" |\n",
+                encoding="utf-8")
+            s = score_claims.score(kit)
+            self.assertEqual(sum(r["agree"] for r in s["rows"]), 2)  # the frozen labels are unchanged
+            self.assertEqual(s["agree_after"], 3)
+            text = score_claims.write_results(kit, s)
+            self.assertIn("| 01.8a | insufficient | supported | supported | \"01.8a -> S\" |", text)
+            self.assertIn("agrees with him on 3 of 3 claims (frozen: 2 of 3)", text)
+
     def test_refuses_a_checker_file_that_does_not_match_the_published_hash(self):
         with tempfile.TemporaryDirectory() as tmp:
             kit = build(Path(tmp), ROWS, tamper=True)
