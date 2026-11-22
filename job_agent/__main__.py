@@ -65,6 +65,7 @@ def main(argv=None) -> int:
     flt.add_argument("--boards", type=Path, default=DEFAULT_BOARDS)
     flt.add_argument("--resume", type=Path, default=DEFAULT_RESUME, help="the profile whose facts the filter reads")
     flt.add_argument("--rules", type=Path, default=filter_mod.FILTER_MD, help="the filter document (Section 7 is read)")
+    flt.add_argument("--filter-version", default=None, help="a FILTER.md version to apply, such as 1.0 (default: the newest)")
     flt.add_argument("--out", type=Path, default=filter_run.DEFAULT_OUT, help="where the run folder is written")
 
     check = commands.add_parser("check-resume", help="validate a résumé and run nothing else")
@@ -109,7 +110,7 @@ def _filter(args) -> int:
     profile = resume.load(args.resume)
     shown = str(args.resume.resolve()).replace(str(Path.home()), "~")
     result = filter_run.run(runs_root=args.runs, boards_path=args.boards, out_root=args.out, rules_path=args.rules,
-                            profile=profile, profile_label=shown)
+                            profile=profile, profile_label=shown, rules_version=args.filter_version)
     fates = result["summary"]["fates"]
     print(f"filter run {result['meta']['run_id']}: {result['summary']['postings']} postings, {fates.get('kept', 0)} "
           f"kept, {fates.get('rejected', 0)} rejected, {fates.get('cannot_tell', 0)} cannot tell; shortlist "

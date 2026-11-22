@@ -15,7 +15,7 @@ spec = importlib.util.spec_from_file_location("heldout_experiments", REPO / "too
 hx = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(hx)
 
-RULES = flt.load_rules()
+RULES = flt.load_rules(version="1.0")
 
 
 def differences(a, b, path=""):
@@ -37,7 +37,7 @@ class VariantsTest(unittest.TestCase):
                 self.assertEqual(differences(RULES, hx.variant(RULES, name)), expected[name])
 
     def test_variants_never_change_the_loaded_rules(self):
-        before = flt.load_rules()
+        before = flt.load_rules(version="1.0")
         for name in hx.RUNS:
             hx.variant(RULES, name)
         self.assertEqual(RULES, before)

@@ -52,6 +52,7 @@ class FilterRunTest(unittest.TestCase):
 
     def run_once(self, **kw):
         clock = lambda: datetime(2026, 11, 21, 5, 0, 0, tzinfo=timezone.utc)  # noqa: E731
+        kw.setdefault("rules_version", "1.0")  # these tests pin FILTER.md v1.0's numbers
         return filter_run.run(runs_root=self.runs, boards_path=self.boards, out_root=self.out, now=clock, **kw)
 
     def test_the_newest_answer_of_each_board_is_filtered(self):

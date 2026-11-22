@@ -317,6 +317,299 @@ description) is narrow on purpose.
 }
 ```
 
+## Version 1.1, 2026-11-22
+
+Added after the reject audit, the claim labels and the held-out measurement (`js3/score/`). Version 1.0 above is not
+edited. The filter command reads the newest Section 7 (the one below); the v1.0 filter run, the three kits, the
+held-out experiments and the MCP server stay on version 1.0, the version they were built, measured or evaluated with.
+
+**Aravind's changes** (his decisions of 2026-11-22, made from the audit and the held-out measurement, so the held-out
+set is development data from now on):
+1. **The shortlist cutoff is 50, not 60.** Every posting that passes the hard rules qualifies, and the score only
+   orders them. Why: in the audit he kept every kept posting he judged, at 50, 55 and 60 alike, and on the held-out set
+   a cutoff of 50 agreed with all 27 of his verdicts (60: 22 of 27).
+2. **An export-control line costs 10 points.** It still never rejects, and it is still shown as a caution. Why: all
+   six of his "?" verdicts were over that line or over clearance; the posting does not say whether Jane may take the
+   job, so it ranks lower.
+3. **"build systems" is no longer a Developer tools word.** Why: on shortlisted posting 09 it matched "build systems
+   that consume and operationalize ML-based signals", a verb and a noun, and he labeled that claim insufficient (09.8c).
+
+**Claude Code's implementation changes** (Section 6):
+4. **Item 1:** the splitter no longer ends a sentence after "U.S.", "e.g." or "i.e.". Why: the cut hid "U.S. Person
+   Required" from audit card 17, and R5's quote fell back to the bare phrase.
+5. **Item 3:** the company words are grew, grown, founded and history; growth, revenue and customers are dropped. Why:
+   they fired 77 times in the run, each time on a real requirement for the candidate (audit card 34 among them).
+
+**Written down, not changed in behavior** (FILTER-CHANGES-PENDING.md):
+6. `years_max` is Jane's value from her profile (3 years); Section 7 keeps it only as a copy the tests compare.
+7. Posting dates come from Ashby's `publishedAt`, Greenhouse's `first_published` (else `updated_at`) and Lever's
+   `createdAt`, read as UTC.
+8. A posting with no id leaves its board unverified. When several hard rules fail, the deciding one is the first in
+   the order R1 to R8.
+
+**Not in 1.1:** a season wholly before the earliest start rejecting (item 2), and every US location that says remote
+counting as US remote (item 4). Neither fired on any of the 1,509 postings, so the run gives no evidence either way;
+they wait for a version with postings that test them. The shortlist's wording for claims 5 to 7 ("the posting does
+not say", `js3/claims/2026-11-21T044414Z/ABSTENTION.md`) is not built yet.
+
+## Section 7, version 1.1: the machine-readable copy (written by Claude Code)
+
+The same as version 1.0's Section 7 except `version`, `date`, `splitter_keeps`, `years_company_words`, the Developer
+tools group, `ranking.shortlist_min` and `ranking.caution_penalty` (a test checks that nothing else differs).
+
+```json
+{
+  "version": "1.1",
+  "date": "2026-11-22",
+  "employment_type_keep": [
+    "FullTime"
+  ],
+  "level_words": [
+    "Senior",
+    "Sr",
+    "Staff",
+    "Principal",
+    "Lead",
+    "Manager",
+    "Director",
+    "Head",
+    "Distinguished",
+    "Fellow",
+    "VP",
+    "Chief",
+    "Architect",
+    "Intern",
+    "Internship"
+  ],
+  "role_includes": [
+    "Software Engineer",
+    "Software Developer",
+    "Backend Engineer",
+    "Back-end Engineer",
+    "Full Stack Engineer",
+    "Full-Stack Engineer",
+    "Infrastructure Engineer",
+    "Platform Engineer",
+    "Data Engineer",
+    "Reliability Engineer",
+    "Machine Learning Engineer",
+    "ML Engineer"
+  ],
+  "role_excludes": [
+    "Frontend",
+    "Front-end",
+    "Android",
+    "iOS",
+    "Mobile",
+    "Firmware",
+    "Hardware",
+    "Embedded",
+    "Camera",
+    "Robotics",
+    "Research",
+    "Security",
+    "Forward Deployed",
+    "Solutions",
+    "Support",
+    "Sales",
+    "Network"
+  ],
+  "status_us_person_phrases": [
+    "U.S. person",
+    "US person",
+    "U.S. citizen",
+    "US citizen",
+    "security clearance",
+    "TS/SCI",
+    "Top Secret",
+    "green card",
+    "permanent resident"
+  ],
+  "status_sponsorship_phrases": [
+    "unable to sponsor",
+    "not able to sponsor",
+    "cannot sponsor",
+    "will not sponsor",
+    "does not sponsor",
+    "do not sponsor",
+    "no sponsorship",
+    "without sponsorship",
+    "sponsorship is not available"
+  ],
+  "caution_phrase": "export control",
+  "start_phrases": [
+    "start immediately",
+    "immediate start",
+    "available immediately",
+    "start ASAP",
+    "start as soon as possible"
+  ],
+  "start_unclear_words": [
+    "spring",
+    "summer",
+    "fall",
+    "autumn",
+    "winter",
+    "early",
+    "mid",
+    "late",
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q4"
+  ],
+  "years_optional_phrases": [
+    "is a plus",
+    "a plus",
+    "preferred",
+    "preferably",
+    "nice to have",
+    "bonus",
+    "desired",
+    "desirable"
+  ],
+  "years_company_words": [
+    "grew",
+    "grown",
+    "founded",
+    "history"
+  ],
+  "years_max": 3,
+  "action_words": [
+    "build",
+    "builds",
+    "building",
+    "built",
+    "develop",
+    "develops",
+    "developing",
+    "developed",
+    "design",
+    "designs",
+    "designing",
+    "designed",
+    "implement",
+    "implements",
+    "implementing",
+    "implemented",
+    "maintain",
+    "maintains",
+    "maintaining",
+    "maintained",
+    "operate",
+    "operates",
+    "operating",
+    "operated"
+  ],
+  "topic_groups": {
+    "Backend": [
+      "backend",
+      "back-end",
+      "server-side",
+      "server side"
+    ],
+    "APIs": [
+      "API",
+      "APIs",
+      "REST",
+      "RESTful",
+      "GraphQL",
+      "gRPC",
+      "endpoints"
+    ],
+    "Distributed systems": [
+      "distributed systems",
+      "distributed services",
+      "event-driven architecture",
+      "message queues",
+      "Kafka"
+    ],
+    "Databases": [
+      "SQL",
+      "PostgreSQL",
+      "MySQL",
+      "MongoDB",
+      "Redis",
+      "database schema",
+      "query optimization"
+    ],
+    "Cloud infrastructure": [
+      "AWS",
+      "Amazon Web Services",
+      "GCP",
+      "Google Cloud",
+      "Azure",
+      "Kubernetes",
+      "Docker",
+      "Terraform",
+      "cloud infrastructure"
+    ],
+    "Microservices": [
+      "microservice",
+      "microservices",
+      "service-oriented architecture"
+    ],
+    "Developer tools": [
+      "developer tools",
+      "developer platform",
+      "internal developer platform",
+      "SDK",
+      "CLI",
+      "CI/CD",
+      "developer experience"
+    ]
+  },
+  "case_sensitive_words": [
+    "REST"
+  ],
+  "annotation_titles": [
+    "AI Trainer",
+    "Data Annotator",
+    "Data Annotation Specialist",
+    "Data Labeler",
+    "Data Labeling Specialist",
+    "AI Rater",
+    "Model Rater",
+    "RLHF Annotator"
+  ],
+  "annotation_responsibility_phrases": [
+    "primary responsibility",
+    "main responsibility",
+    "day-to-day work",
+    "most of your time"
+  ],
+  "annotation_task_phrases": [
+    "label data",
+    "data labeling",
+    "annotate examples",
+    "data annotation",
+    "rate AI responses",
+    "rate model outputs"
+  ],
+  "ranking": {
+    "start": 50,
+    "per_topic_group": 5,
+    "topic_cap": 25,
+    "other_us_location": -15,
+    "location_cannot_tell": -10,
+    "employment_type_cannot_tell": -10,
+    "start_cannot_tell": -10,
+    "years_cannot_tell": -10,
+    "shortlist_min": 50,
+    "shortlist_size": 10,
+    "caution_penalty": -10
+  },
+  "splitter_keeps": [
+    "U.S.",
+    "e.g.",
+    "i.e."
+  ]
+}
+```
+
 ## Changelog
 
 - **1.0, 2026-11-20:** first version, written before the JS3 build.
+- **1.1, 2026-11-22:** cutoff 50, an export-control line costs 10 points, "build systems" dropped (Aravind's
+  calls); the splitter keeps "U.S.", "e.g." and "i.e.", and three company words are dropped (Claude Code's). See
+  "Version 1.1" above.

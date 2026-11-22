@@ -185,6 +185,11 @@ class Server:
         return _result(rid, score_posting(self.repo, arguments["board"], arguments["posting_id"]))
 
 
+# The FILTER.md version this server scores with: the one it was evaluated and recorded with
+# (js3/mcp/EVALUATION-OWN.md, 2026-11-21). Moving it to a later version is a change that reopens
+# Aravind's trust decision, so it is named here rather than following the newest version.
+SERVED_FILTER_VERSION = "1.0"
+
 def initialize_problems(params) -> list:
     """What the initialize request lacks (MCP 2025-11-25: protocol version, capabilities, client information)."""
     if not isinstance(params, dict):
@@ -226,7 +231,7 @@ def score_posting(repo: Path, board: str, posting_id: str) -> dict:
         if source["run"] is None:
             return _tool_error(f"Board {board} has no saved HTTP 200 answer in runs/.")
         postings = providers.read(source["system"], 200, source.pop("body"))
-        rules = flt.load_rules(repo / "FILTER.md")
+        rules = flt.load_rules(repo / "FILTER.md", version=SERVED_FILTER_VERSION)
         profile = flt.load_profile(repo.joinpath(*PROFILE))
         flt.check_profile(profile)
         filter_sha256 = hashlib.sha256((repo / "FILTER.md").read_bytes()).hexdigest()

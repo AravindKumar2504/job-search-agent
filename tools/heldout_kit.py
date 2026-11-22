@@ -85,7 +85,7 @@ def build(run_dir: Path, out_root: Path, audit: Path = None, seed: int = DEFAULT
     if out.exists():
         raise SystemExit(f"{out} already exists; a held-out set is made once, before any verdict")
     postings = {key: posting for key, (posting, _) in audit_kit.saved_postings(data).items()}
-    rules = flt.load_rules()
+    rules = flt.load_rules(version=data["meta"].get("filter_version", "1.0"))  # the run's own version
     cards, answers = [], []
     for n, (pool, r) in enumerate(drawn, 1):
         cards.append(audit_kit.card(n, postings[(r["board"], r["id"])], r["board"], rules))

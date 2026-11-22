@@ -145,11 +145,11 @@ def report_from_saved() -> int:
     saved = {name: json.loads((folder / f"{name}.json").read_text(encoding="utf-8")) for name in RUNS}
     results = {}
     for name, s in saved.items():
-        cutoff = variant(flt.load_rules(), name)["ranking"]["shortlist_min"]
+        cutoff = variant(flt.load_rules(version="1.0"), name)["ranking"]["shortlist_min"]
         results[name] = {"rows": s["rows"], "metrics": metrics(s["rows"], cutoff), "cutoff": cutoff}
     counts_file = folder / "whole-run.json"
     if not counts_file.exists():
-        counts_file.write_text(json.dumps(whole_counts(whole_run(flt.load_rules())), indent=1) + "\n",
+        counts_file.write_text(json.dumps(whole_counts(whole_run(flt.load_rules(version="1.0"))), indent=1) + "\n",
                                encoding="utf-8")
     counts = json.loads(counts_file.read_text(encoding="utf-8"))
     text = write_report(results, counts, stamp, saved["R0"]["plan_commit"], False)
@@ -172,7 +172,7 @@ def main(argv=None) -> int:
     data = json.loads((FILTER_RUN / "verdicts.json").read_text(encoding="utf-8"))
     postings = {key: p for key, (p, _) in audit_kit.saved_postings(data).items()}
     boards = {(r["board"], r["id"]) for r in data["records"]}
-    base_rules, jane = flt.load_rules(), flt.load_profile()
+    base_rules, jane = flt.load_rules(version="1.0"), flt.load_profile()
     results, whole, files = {}, {}, {}
     for name in RUNS:
         rules = variant(base_rules, name)

@@ -15,7 +15,7 @@ from job_agent.errors import BrokenInput
 
 from .loop_helpers import REPO
 
-RULES = flt.load_rules()
+RULES = flt.load_rules(version="1.0")
 JANE = flt.load_profile()
 SECTION_1 = flt.FILTER_MD.read_text(encoding="utf-8").split("## Section 1")[1].split("## Section 2")[0]
 SECTION_6 = flt.FILTER_MD.read_text(encoding="utf-8").split("## Section 6")[1].split("## Section 7")[0]

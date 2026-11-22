@@ -30,7 +30,7 @@ COMMITTED = REPO / "js3" / "claims" / RUN_ID
 CLAIM_ROW = re.compile(r"^\| (\d\d\.\d[a-z]?) \|")
 EXPORT = ("To comply with U.S. export control laws and regulations, candidates for this role may need to meet certain "
           "legal status requirements.")
-RULES, JANE = flt.load_rules(), flt.load_profile()
+RULES, JANE = flt.load_rules(version="1.0"), flt.load_profile()
 S, C, I = claims_kit.SUPPORTED, claims_kit.CONTRADICTED, claims_kit.INSUFFICIENT
 
 
@@ -156,7 +156,8 @@ class ClaimsKitTest(unittest.TestCase):
         save(runs, "2026-11-02T000000Z", "greenhouse-beta", body("greenhouse", [gh]))
         save(runs, "2026-11-02T000000Z", "lever-gamma", body("lever", [lever]))
         clock = lambda: datetime(2026, 11, 21, 7, 0, 0, tzinfo=timezone.utc)  # noqa: E731
-        self.run = filter_run.run(runs_root=runs, boards_path=boards, out_root=self.root / "runs-out", now=clock)
+        self.run = filter_run.run(runs_root=runs, boards_path=boards, out_root=self.root / "runs-out", now=clock,
+                                      rules_version="1.0")
         self.raw = {**{j["id"]: j for j in jobs}, "7": gh, "l-1": lever}
 
     def build(self, seed=5):

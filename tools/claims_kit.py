@@ -401,7 +401,8 @@ def build(run_dir: Path, out_root: Path, seed: int = DEFAULT_SEED) -> Path:
     data = json.loads((run_dir / "verdicts.json").read_text(encoding="utf-8"))
     if not data.get("shortlist"):
         raise SystemExit(f"{run_dir} has no shortlist, so there are no claims to label")
-    rules, profile = flt.load_rules(), flt.load_profile()
+    rules = flt.load_rules(version=data["meta"].get("filter_version", "1.0"))  # the run's own version
+    profile = flt.load_profile()
     saved = audit_kit.saved_postings(data)
     systems = {s["key"]: s["system"] for s in data["meta"]["sources"]}
     records = {(r["board"], r["id"]): r for r in data["records"]}

@@ -40,7 +40,8 @@ class AuditKitTest(unittest.TestCase):
         jobs += [ashby_job("y-1", title="Software Engineer, Years", descriptionPlain="5+ years of experience. " + TOPIC)]
         save(runs, "2026-11-02T000000Z", "ashby-acme", body("ashby", jobs))
         clock = lambda: datetime(2026, 11, 21, 6, 0, 0, tzinfo=timezone.utc)  # noqa: E731
-        self.run = filter_run.run(runs_root=runs, boards_path=boards, out_root=self.root / "runs-out", now=clock)
+        self.run = filter_run.run(runs_root=runs, boards_path=boards, out_root=self.root / "runs-out", now=clock,
+                                      rules_version="1.0")
 
     def build(self, seed=7):
         return audit_kit.build(self.run["out"], self.root / f"audit-{seed}-{len(list(self.root.iterdir()))}", seed,

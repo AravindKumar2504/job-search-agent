@@ -242,7 +242,7 @@ class ToolTest(Fixture):
         data = payload(answer)
         posting = providers.read("ashby", 200, body("ashby", [ashby_job(KEPT_ID, descriptionPlain=GOOD)]))[0]
         expected = flt.judge(posting, flt.load_profile(self.root / "persona" / "jane-doe.json"),
-                             flt.load_rules(self.root / "FILTER.md"), board="ashby-openai")
+                             flt.load_rules(self.root / "FILTER.md", version="1.0"), board="ashby-openai")
         self.assertEqual(data["record"], json.loads(json.dumps(expected)))
         self.assertEqual(data["summary"], {"fate": "kept", "deciding_rule": None, "deciding_quote": None,
                                            "score": 65, "cannot_tell": None})
@@ -312,7 +312,7 @@ class ToolTest(Fixture):
     def test_hidden_characters_are_dropped_from_the_result(self):
         posting = providers.read("ashby", 200, body("ashby", [ashby_job(
             HIDDEN_ID, title="Software Engineer, Hidden", descriptionPlain="We build APIs\u200b in Go.")]))[0]
-        own = flt.judge(posting, flt.load_profile(), flt.load_rules(), board="ashby-openai")
+        own = flt.judge(posting, flt.load_profile(), flt.load_rules(version="1.0"), board="ashby-openai")
         self.assertIn("\u200b", own["topics"]["APIs"]["sentence"])  # the filter keeps it; the server must not
         answer = self.ready().handle(call(2, args(posting_id=HIDDEN_ID)))
         self.assertNotIn("\u200b", text(answer))

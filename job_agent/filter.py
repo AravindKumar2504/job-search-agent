@@ -56,17 +56,31 @@ _STATE_CODE = re.compile(r",\s*([A-Z]{2})\b")
 _GENERIC_PLACE = re.compile(r"(?i)^[\s,;/()\-]*(?:(?:remote|anywhere|hybrid|flexible|global|worldwide)[\s,;/()\-]*)*$")
 
 
-def load_rules(path: Path = FILTER_MD) -> dict:
-    """The machine-readable copy in FILTER.md Section 7, checked for every key the engine reads."""
+def load_rules(path: Path = FILTER_MD, version: str = None) -> dict:
+    """The machine-readable copy in FILTER.md Section 7, checked for every key the engine reads.
+
+    FILTER.md keeps every version (a later one is added below with its date, the earlier ones are never edited),
+    each with its own Section 7. version=None reads the newest; a run, kit or server tied to an earlier version
+    names it (for example "1.0").
+    """
     text = Path(path).read_text(encoding="utf-8")
-    at = text.find("## Section 7")
-    match = re.search(r"```json\n(.*?)\n```", text[at:], re.S) if at >= 0 else None
-    if match is None:
+    blocks = []
+    for heading in re.finditer(r"^## Section 7[^\n]*\n", text, re.M):
+        match = re.search(r"```json\n(.*?)\n```", text[heading.end():], re.S)
+        if match:
+            blocks.append(match.group(1))
+    if not blocks:
         raise BrokenInput(f"{Path(path).name} has no JSON block under '## Section 7'")
     try:
-        rules = json.loads(match.group(1))
+        versions = [json.loads(block) for block in blocks]
     except ValueError as exc:
         raise BrokenInput(f"{Path(path).name} Section 7 is not valid JSON ({exc})") from None
+    if version is None:
+        rules = versions[-1]
+    else:
+        rules = next((v for v in versions if v.get("version") == version), None)
+        if rules is None:
+            raise BrokenInput(f"{Path(path).name} has no Section 7 for version {version}")
     missing = [k for k in REQUIRED_KEYS if k not in rules] + \
               [f"ranking.{k}" for k in RANKING_KEYS if k not in (rules.get("ranking") or {})]
     if missing:

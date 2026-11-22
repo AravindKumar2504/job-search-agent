@@ -56,7 +56,8 @@ class HeldoutKitTest(unittest.TestCase):
         jobs += [ashby_job(f"r-{i}", title=f"Senior Software Engineer, Team {i}") for i in range(6)]  # rejected (R3)
         save(runs, "2026-11-02T000000Z", "ashby-acme", body("ashby", jobs))
         clock = lambda: datetime(2026, 11, 21, 8, 0, 0, tzinfo=timezone.utc)  # noqa: E731
-        self.run = filter_run.run(runs_root=runs, boards_path=boards, out_root=self.root / "runs-out", now=clock)
+        self.run = filter_run.run(runs_root=runs, boards_path=boards, out_root=self.root / "runs-out", now=clock,
+                                      rules_version="1.0")
         self.audit = self.root / "answers.json"
         self.audit.write_text(json.dumps({"answers": [{"board": "ashby-acme", "id": "k-0", "fate": "kept"},
                                                       {"board": "ashby-acme", "id": "r-0", "fate": "rejected"}]}),

@@ -71,9 +71,10 @@ def newest_answers(runs_root: Path, boards: list) -> list:
 
 
 def run(*, runs_root: Path, boards_path: Path, out_root: Path = DEFAULT_OUT, rules_path: Path = flt.FILTER_MD,
-        profile: dict = None, profile_label: str = "persona/jane-doe.json (Jane Doe, fictional)", now=None) -> dict:
+        profile: dict = None, profile_label: str = "persona/jane-doe.json (Jane Doe, fictional)", now=None,
+        rules_version: str = None) -> dict:
     """Filter every posting of the newest saved answers; write verdicts.json and report.md; return the summary."""
-    rules = flt.load_rules(rules_path)
+    rules = flt.load_rules(rules_path, version=rules_version)  # None: the newest version in FILTER.md
     profile = profile if profile is not None else flt.load_profile()
     flt.check_profile(profile)
     boards = json.loads(Path(boards_path).read_text(encoding="utf-8"))["boards"]

@@ -11,7 +11,7 @@ from job_agent import filter as flt
 
 from .test_filter import posting
 
-RULES = flt.load_rules()
+RULES = flt.load_rules(version="1.0")
 JANE = flt.load_profile()
 
 

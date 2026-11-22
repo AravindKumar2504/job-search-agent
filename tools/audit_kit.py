@@ -139,7 +139,7 @@ def saved_postings(data: dict) -> dict:
 def build(run_dir: Path, out_root: Path, seed: int = DEFAULT_SEED, **sizes) -> Path:
     run_dir = Path(run_dir)
     data = json.loads((run_dir / "verdicts.json").read_text(encoding="utf-8"))
-    rules = flt.load_rules()
+    rules = flt.load_rules(version=data["meta"].get("filter_version", "1.0"))  # the run's own version
     postings = {key: posting for key, (posting, _) in saved_postings(data).items()}
     drawn = draw(data["records"], seed, **sizes)
     random.Random(seed + 1).shuffle(drawn)
