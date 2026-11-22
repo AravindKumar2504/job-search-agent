@@ -3,7 +3,7 @@
 JS3, step 2 item 3: "evaluate it the way you would a server someone else wrote." The server was built by Claude Code
 at my request (commit `a54c424`). This evaluation was drafted by Claude Code on 2026-11-21 from the source, the
 recorded runs and the tests named below; every claim carries its evidence type. The trust decision at the end is mine
-and is left blank until I write it.
+(written on 2026-11-22).
 
 ## What was evaluated, and with what
 
@@ -204,5 +204,7 @@ repo; with `-B` the tests find no new file]
 
 ## Trust decision (Aravind's)
 
-<!-- One line, in my own words: allow / deny / pending, for which task and server version, and the re-review trigger. -->
+**Pending.** I would use `score_posting` for local, read-only scoring of saved postings with server version 1.0.0 at commit `a54c424`, but I would not approve it for broader use yet. I would reconsider after MCP conformance and security testing, or if the server, its arguments, the filter, or the Claude Code version changes.
+
+*Aravind, 2026-11-22. In my own words; Claude Code only turned the dash into a full stop and marked the names as code.*
 

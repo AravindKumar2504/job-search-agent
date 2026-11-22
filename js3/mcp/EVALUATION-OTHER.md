@@ -3,7 +3,7 @@
 JS3, step 2 item 3: "Evaluate one other tool server from a source you can name the same way." The other server is the
 reference implementation of the course's lesson 8, written by the instructor. This evaluation was drafted by Claude
 Code on 2026-11-21 from the source, one recorded run of our client against it, and the course repo's history; every
-claim carries its evidence type. The trust decision at the end is mine and is left blank until I write it.
+claim carries its evidence type. The trust decision at the end is mine (written on 2026-11-22).
 
 ## What was evaluated, and with what
 
@@ -148,5 +148,7 @@ no write except `print(...)` to stdout (lines 60 and 69). [source-inspected]
 
 ## Trust decision (Aravind's)
 
-<!-- One line, in my own words: allow / deny / pending, for which task and server version, and the re-review trigger. -->
+**Allow.** I trust commit `5639e4c8` for local comparison using its fixed course data and the existing read-only tool. I would reconsider if the code changes, another tool is added, it reads external files or network data, or it is connected to Claude Code.
+
+*Aravind, 2026-11-22. In my own words; Claude Code only turned the dash into a full stop and marked the commit as code.*
 
