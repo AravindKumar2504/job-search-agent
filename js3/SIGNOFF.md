@@ -54,8 +54,8 @@ get an interview. It does not apply for jobs, contact employers or verify legal 
 miss rate for all postings: the audit only bounds the misses among one day's rejects (at most 9.5% with my card-17
 answer, 14.9% as frozen).
 
-**Signed or withheld:** withheld for now. I sign at the end, after the v1.1 experiments, so the sign-off covers them
-(my decision, 2026-11-22).
+**Signed or withheld:** Signed: Aravind Sundaravadivelu, 2026-11-22. (Withheld until the v1.1 work was done, as I
+chose earlier that day; signed after it, so the sign-off covers it.)
 
 ## Driver's seat
 
