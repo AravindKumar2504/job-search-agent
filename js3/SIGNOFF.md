@@ -13,8 +13,9 @@ pointers. The checks, the decisions and the signature are mine; my notes are kep
   (`45fc2c0`). Of 30 random rejects I would have kept 1, card 17; once I saw the "U.S. Person Required" line its card
   had hidden, I would reject it too, so 0 of 30 (`js3/audit/2026-11-21T044414Z/RESULTS.md`, `AFTER-REVEAL.md`).
 - The filter's keeps. Of the 18 kept postings in the audit, I judged 16 and agreed with all 16; the other 2 were "?".
-- A fresh held-out set. I judged 30 cards by hand and froze my verdicts (`1e2b1e1`). Their answers are still sealed,
-  for measuring the v1.1 changes once.
+- A fresh held-out set. I judged 30 cards by hand and froze my verdicts (`1e2b1e1`). Their answers were opened once,
+  after the changes to measure and their predictions were committed (`1c9a37e`): FILTER.md v1.0's keep or reject
+  agreed with all 27 cards I judged (`js3/score/EXPERIMENTS.md`, `cb1b50c`).
 - The shortlist's claims. I labeled all 105 claims by hand and froze them before the checker's labels were opened
   (`1608a04`). The rule-based checker agrees with me on 101 (`57041c4`), and on 102 after my four flip checks
   (`cb4943a`).
@@ -31,9 +32,10 @@ pointers. The checks, the decisions and the signature are mine; my notes are kep
   were the same (51 of 55 agree, 1 miss, 3 "?"; 1 miss in 30 and a 14.9% bound, 0 in 30 and 9.5% after the reveal;
   the checker agrees on 101 of 105), and both RESULTS.md files came out byte for byte the same.
 - **With Claude's help:** Claude Code built the filter, the board readers, the audit, held-out and claims kits, the
-  scoring scripts, the MCP server and the first drafts of both evaluations, and the test suite (330 tests with mine;
-  82 of 82 planted mistakes caught on 2026-11-21). It ran those checks, fixed the cards after card 17, and found the
-  sentence behind each claim disagreement.
+  scoring scripts, the held-out experiment tool, the MCP server and the first drafts of both evaluations, FILTER.md
+  v1.1 around my three calls, and the test suite (348 tests with mine; 82 of 82 planted mistakes caught on
+  2026-11-21). It ran those checks and the held-out measurement, fixed the cards after card 17, and found the sentence
+  behind each claim disagreement.
 
 **Not checked:**
 - Postings beyond what the audit covers: one day's saved answers (2026-11-20) of three boards (OpenAI, Verkada and
@@ -44,8 +46,8 @@ pointers. The checks, the decisions and the signature are mine; my notes are kep
   hinge on such lines or on clearance.
 - Whether either MCP server is secure or conforms to the MCP specification. Both evaluations say not conformant and not
   shown to be secure.
-- Whether the results hold as postings change and after the v1.1 changes. Those changes are not measured yet, and the
-  held-out set is still sealed.
+- Whether the results hold as postings change, and whether v1.1 holds on new labels: I made my three v1.1 calls after
+  seeing the held-out results, so that set no longer tests them, and no fresh set has been labeled since.
 
 **Not claiming:** This agent is a job-posting evaluation tool, not a guarantee that Jane is eligible for a job or will
 get an interview. It does not apply for jobs, contact employers or verify legal work authorization. It also gives no
