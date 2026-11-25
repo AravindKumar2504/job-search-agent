@@ -103,6 +103,13 @@ The MCP server, our client and the Claude Code run have their own commands in [j
   The filter's deciding rule there was my own R4: the title, "Forward Deployed Software Engineer, New Grad - Warp
   Speed", is one R4 excludes, so my blind Keep also went against my own rule; I kept R4 as written. FILTER.md v1.1
   rejects the same 1,409 postings as v1.0, so the bound holds for v1.1's rejects unchanged.
+- **Against constant answers** ([js3/checks/BASELINES.md](js3/checks/BASELINES.md), computed after the fact):
+  "reject everything" agrees with me on 35 of the 52 audit cards I judged and "keep everything" on 17, against the
+  filter's 51; on the held-out set, 15 and 12 of 27 against 27. 28 of the 30 random rejects fail R4 and only 2 sit
+  near the boundary (an engineering title failing one other rule, 111 of the 1,409 rejects), so the clean audit is
+  mostly a result on easy rejects. Rebuilt with today's card builder, no audit card besides 17 hid a line a rule
+  reads ([CARD-REBUILD.md](js3/checks/CARD-REBUILD.md)). Topic points from sentences many postings share: 4 points,
+  on two copies of one Palantir posting, and none in either top 10 ([BOILERPLATE.md](js3/checks/BOILERPLATE.md)).
 - **False friends:** "growth" in "5+ years of experience in data science or growth analytics" made the years rule
   read a requirement as a sentence about the company (audit card 34). "build systems" in "build systems that consume ...
   ML-based signals" is a verb and a noun, yet it gave a shortlisted posting 5 points for developer tools (claim 09.8c).

@@ -37,6 +37,17 @@ Written by Claude Code on 2026-11-22. Every number below recomputes from the fil
 A rate for all postings; anything about boards the agent does not watch or about live postings; whether a cutoff of 50
 would still agree with him on another day's postings. Two predictions held only in part, and are reported as such.
 
+What the draw could detect, computed after the fact on 2026-11-24 ([`js3/checks/BASELINES.md`](../checks/BASELINES.md),
+section 4):
+- X3's "no card changes" says little: a uniform draw of 15 from the 69 eligible kept postings misses all 4 whose score
+  X3 moves 36.6% of the time.
+- X2 did change which rules fail on 69 rejected postings, two of them held-out cards (03 and 11), without moving a fate
+  or a score; `EXPERIMENTS.md` compares fates and scores only, so it reports no change.
+- X4's prediction "fewer recommended" could not have shown at the cutoff of 60: X4 moves no recommendation at 60
+  anywhere in the whole run.
+
+The calls made from these results were then tested on fresh labels: [`js3/fresh/2026-11-22T084738Z/`](../fresh/2026-11-22T084738Z/RESULTS.md).
+
 ## What it leads to (FILTER.md v1.1)
 
 - Claude Code's implementation changes X1 (the splitter) and X2 (the company words): adopt. They fix what the audit
