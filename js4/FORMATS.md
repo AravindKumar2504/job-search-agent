@@ -12,7 +12,7 @@ The run id is `YYYY-MM-DDTHHMMSS.ffffffZ-<worker>`, for example `2026-11-26T1500
 
 | File | What it holds |
 |---|---|
-| `trace.jsonl` | one JSON object per line: `{"at": <time>, "event": <name>, ...}` (events below) |
+| `trace.jsonl` | one JSON object per line: `{"step": <n>, "at": <time>, "kind": <name>, ...}` (the kinds below) |
 | `boards/<system>-<name>/attempt-<n>.json.gz` | a board's answer, byte for byte, gzip-compressed; the SHA-256 is of the uncompressed bytes |
 | `boards/<system>-<name>/attempt-<n>.meta.json` | `url`, `status`, `received_at`, `bytes`, `sha256`, `retry`, `source`, `body_file` |
 | `diff.json` | S3's result (below) |
@@ -21,9 +21,9 @@ The run id is `YYYY-MM-DDTHHMMSS.ffffffZ-<worker>`, for example `2026-11-26T1500
 | `evidence.json`, `evidence.md` | the checker's output, written by the watcher |
 | `report.json`, `report.md` | S9's report: the exit first |
 
-### Trace events the checker may read
+### Trace kinds the checker may read
 
-| Event | Fields |
+| Kind | Fields |
 |---|---|
 | `run_start` | `run_id`, `worker`, `source` ("live", "replay of runs/<id>", "seeded: ...", "staged: ..."), `plan_version`, `budgets`, `code_sha256`, `git_head` |
 | `memory_read` | `board` (`<system>-<name>`), `version` (0 for the schema-2 file), `file` (repo-relative), `sha256` |
@@ -36,7 +36,7 @@ The run id is `YYYY-MM-DDTHHMMSS.ffffffZ-<worker>`, for example `2026-11-26T1500
 | `notes_write`, `memory_write` | `version` created, or `refused` with the version that already existed |
 | `exit` | `status`, `code`, `reasons` |
 
-The answer that counts for a board is the attempt named by its `board_status` event.
+The answer that counts for a board is the attempt named by its `board_status` line.
 
 ## `summary.json` (S5)
 
@@ -75,11 +75,16 @@ The answer that counts for a board is the attempt named by its `board_status` ev
 ```
 
 - `boards` lists every board of the watcher. For a board that is not "read", `counts` is `null`.
-- `claims` holds one entry per **new kept** posting. `location.category` is one of "preferred", "other US",
-  "US remote", "cannot tell". `pay` is `null` when no pay sentence was found. `work_authorization.sentences` lists the
+- `claims` holds one entry per **new kept** posting. `location.category` is one of: "preferred" (at least one listed
+  place is in one of the persona's regions or cities), "US remote" (no such place, and a listed place is one of the
+  persona's remote wordings, or the posting is remote in the US), "other US" (a US place, none of the above), "cannot
+  tell" (no listed place can be read). A posting with only places outside the US is rejected, so it is never claimed. `pay` is `null` when no pay sentence was found. `work_authorization.sentences` lists the
   sentences the producer found about status, sponsorship or export control, word for word from the posting's text.
 - `gone` holds one entry per gone posting.
 - In a replay, `live` is replaced by `"listed_on": "<date of the replayed answer>"`.
+- Every sentence in a claim is compared with the posting's text after whitespace normalization (any run of spaces,
+  tabs or newlines is one space). A work-authorization sentence found in the text counts as on the line when it is
+  contained in one of the claim's sentences, or contains one, after that normalization.
 
 ## `diff.json` (S3) and `verdicts.json` (S4)
 
