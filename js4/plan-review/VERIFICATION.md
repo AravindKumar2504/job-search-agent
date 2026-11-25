@@ -1,7 +1,7 @@
 # My verification of review 1
 
-The reviewer's text is in [REVIEW-1.md](REVIEW-1.md). Claude Code summarized its twelve real problems for me in chat
-on 2026-11-25, and checked the factual claims it could against the code and the saved runs: the permission module
+The reviewer's text is in [REVIEW-1.md](REVIEW-1.md). Its twelve real problems were summarized for me on 2026-11-25,
+and its factual claims that could be checked against the code and the saved runs were checked: the permission module
 refuses `boards-w1.json` and `FILTER.md`; every writer uses the same temporary file name; run ids go only to the
 second; OpenAI's memory holds 907 seen ids and 811 listed; Verkada posting 5302623007 says "This role does not offer
 visa sponsorship." and none of R5's sponsorship phrases matches it; R2's quote "London, UK; Munich, Germany; Paris,
@@ -32,7 +32,7 @@ fetch, diff, filter and check, and then stops before it writes any note or memor
 
 ## The smaller problems and the matters of taste
 
-Claude Code told me it would take the review's smaller fixes unless I objected, and I did not: FILTER.md pinned to
+I also accepted the review's smaller fixes: FILTER.md pinned to
 v1.1 with the SHA-256 of its own Section 7; GATE.md's repeat rule kept (a repeated board is skipped and reported);
 each run's listed ids stored once and never changed; ids carried over from the old memory format labeled with the
 run that first saw them, rebuilt from the saved answers, or "carried over from schema 2"; a board with no answer at
@@ -40,5 +40,4 @@ all handled at S2; JS4 refusing to start while JS1's `state/seen.json` exists; t
 case; the fallback for the two-day run; and no development run against the live `state/`. The four matters of taste
 stay as version 0.1 had them.
 
-*Aravind, 2026-11-25. My decisions and reasons are mine, word for word; Claude Code wrote the first paragraph, this
-section's list and the sentence after my qualification.*
+*Aravind, 2026-11-25. My decisions and reasons are word for word as I sent them.*

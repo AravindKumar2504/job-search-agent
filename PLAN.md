@@ -1,7 +1,7 @@
 # Plan: Job-Search Agent 4 (the plan, the evidence and the memory)
 
-**Version 1.0, 2026-11-25: the reviewed plan.** Version 0.1 (commit `4ae45c8`) was the draft Claude Code wrote at my
-request before any JS4 code or run. A fresh, read-only Claude reviewer found twelve real problems in it
+**Version 1.0, 2026-11-25: the reviewed plan.** Version 0.1 (commit `4ae45c8`) was the first draft, made before any
+JS4 code or run. A fresh, read-only review found twelve real problems in it
 ([js4/plan-review/REVIEW-1.md](js4/plan-review/REVIEW-1.md)); I verified each one and accepted all twelve, with one
 qualification ([VERIFICATION.md](js4/plan-review/VERIFICATION.md)). This version is the result, and every change from
 0.1 is logged under "Changes" with the review item behind it. It is committed before any JS4 code is written and

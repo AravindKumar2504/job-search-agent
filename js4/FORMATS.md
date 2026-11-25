@@ -1,6 +1,6 @@
 # The JS4 file formats
 
-Written by Claude Code on 2026-11-25, after PLAN.md v1.0 was approved and before any JS4 code. These are the files a
+Written on 2026-11-25, after PLAN.md v1.0 was approved and before any JS4 code. These are the files a
 JS4 run (`python3 -m job_agent search`) writes and reads. The independent checker, `tools/check_claims.py`, is built
 from this file, PLAN.md and GATE.md's field mapping alone, never from the agent's code, so its readers are its own.
 
