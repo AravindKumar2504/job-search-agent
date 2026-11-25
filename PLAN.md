@@ -5,7 +5,7 @@ request before any JS4 code or run. A fresh, read-only Claude reviewer found twe
 ([js4/plan-review/REVIEW-1.md](js4/plan-review/REVIEW-1.md)); I verified each one and accepted all twelve, with one
 qualification ([VERIFICATION.md](js4/plan-review/VERIFICATION.md)). This version is the result, and every change from
 0.1 is logged under "Changes" with the review item behind it. It is committed before any JS4 code is written and
-before the first JS4 run. **Approved:** pending my word.
+before the first JS4 run. **Approved:** by me on 2026-11-25, as written, including the notes budget of 400.
 
 This plan extends [GATE.md](GATE.md) (JS2's budgets, exits, repeat rule, error and permission policies) and uses
 [FILTER.md](FILTER.md) version 1.1, pinned. Where they differ, this file wins for a JS4 run. It widens GATE.md in one
