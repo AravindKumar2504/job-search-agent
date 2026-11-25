@@ -271,5 +271,9 @@ evaluation's own terms the decision is reopened. The decision itself says it wou
 arguments, the filter, or the Claude Code version changes". The comparison shows that the scoring served in these
 sessions did not change; it does not make the call.
 
-**Aravind's call after these changes:** (to be written by Aravind)
+**Aravind's call after these changes:** **Still pending.** Same scope as before: fine for local, read-only scoring
+of saved postings, not approved for broader use until conformance and security testing.
+
+*Aravind, 2026-11-24. He chose this from the two options Claude Code laid out with the evidence above (still pending,
+or allow for local read-only use); the words are the option's, which he picked.*
 

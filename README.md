@@ -186,7 +186,8 @@ The MCP server, our client and the Claude Code run have their own commands in [j
 - The MCP server is a subset of MCP 2025-11-25, not conformant and not shown to be secure, and it stays on FILTER.md
   v1.0, the version it was evaluated with. Two commits after my trust decision changed it or the modules it calls
   (`b8e3a25`, `5dff01f`), which by the evaluation's own terms reopens the decision ([EVALUATION-OWN.md](js3/mcp/EVALUATION-OWN.md),
-  "Changes after the trust decision"). The runtime traces show what the servers did in these sessions only.
+  "Changes after the trust decision"); my call after them (2026-11-24): still pending, with the same scope. The
+  runtime traces show what the servers did in these sessions only.
 - Not in v1.1: the shortlist saying "the posting does not say" for claims 5 to 7, and two rules that never fired.
 
 ## Contents
