@@ -20,7 +20,7 @@ the runtime trace (below) and put its evidence into both evaluations.
 | `js3/mcp/transcripts/` | Every transcript (next table). |
 | `js3/mcp/EVALUATION-OWN.md` | Our server: the four ledgers, declared against actual, what a client is not entitled to, the findings, and my trust decision. |
 | `js3/mcp/EVALUATION-OTHER.md` | The same for the lesson 8 reference server. |
-| `tests/test_mcp_server.py`, `tests/test_mcp_client.py` | 33 and 9 tests. |
+| `tests/test_mcp_server.py`, `tests/test_mcp_client.py` | 33 and 10 tests. |
 | `js3/checks/mutants-2026-11-21-mcp.txt` | The full mutants run with six planted server mistakes. |
 | `tools/mcp_runtime_trace.py`, `tools/mcp_trace_boot.py` | The runtime trace (2026-11-24): each server, its code unchanged, run under a Python audit hook (PEP 578) through our client's five sessions; what it opens, writes, connects to and starts, and its answers compared across runs. |
 | `js3/mcp/runtime/2026-11-25T023441Z/` | The trace's evidence, recorded on 2026-11-24 (the name is UTC), on Python 3.12.14 and 3.9.6: an event summary (JSON and Markdown) and the client's transcript for each run, and the comparisons. Its README says what the runs show and gives the command that re-checks them. |

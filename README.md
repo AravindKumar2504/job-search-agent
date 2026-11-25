@@ -31,7 +31,7 @@ The course folder holds a snapshot of one commit (its SNAPSHOT.md), so the hashe
 | The filter over everything collected | [js3/filter-run/2026-11-21T044414Z/](js3/filter-run/2026-11-21T044414Z/report.md) (v1.0: 1,509 postings, 99 kept, 1,409 rejected, 1 "I cannot tell") and [2026-11-22T084738Z](js3/filter-run/2026-11-22T084738Z/report.md) (v1.1) |
 | The reject audit: 30 or more random rejects judged by hand, what the sample can show, a named false friend | [js3/audit/2026-11-21T044414Z/](js3/audit/2026-11-21T044414Z/): the sealed kit (`c19dd8e`), my 55 verdicts (`45fc2c0`), [RESULTS.md](js3/audit/2026-11-21T044414Z/RESULTS.md) (`79df09c`), [AFTER-REVEAL.md](js3/audit/2026-11-21T044414Z/AFTER-REVEAL.md); the false friends are under "Results" |
 | The source-grounded shortlist: every claim labeled, relevance versus entailment, an abstention rule | [js3/claims/2026-11-21T044414Z/](js3/claims/2026-11-21T044414Z/): my 105 labels (`1608a04`), [RESULTS.md](js3/claims/2026-11-21T044414Z/RESULTS.md) and [FLIP-CHECKS.md](js3/claims/2026-11-21T044414Z/FLIP-CHECKS.md) (`57041c4`, `cb4943a`), [ABSTENTION.md](js3/claims/2026-11-21T044414Z/ABSTENTION.md) |
-| The tool server, its transcripts, and two evaluations with a trust decision | [js3/mcp/](js3/mcp/README.md): `job_agent/mcp_server.py`, the transcripts, [EVALUATION-OWN.md](js3/mcp/EVALUATION-OWN.md) and [EVALUATION-OTHER.md](js3/mcp/EVALUATION-OTHER.md), each ending with my trust decision (`d4c9eb0`) |
+| The tool server, its transcripts, and two evaluations with a trust decision | [js3/mcp/](js3/mcp/README.md): `job_agent/mcp_server.py`, the transcripts, [EVALUATION-OWN.md](js3/mcp/EVALUATION-OWN.md) and [EVALUATION-OTHER.md](js3/mcp/EVALUATION-OTHER.md), each ending with my trust decision (`d4c9eb0`), and the runtime traces of both servers ([js3/mcp/runtime/](js3/mcp/runtime/2026-11-25T023441Z/README.md), 2026-11-24) |
 | What moves the score: the origin of every number, one change at a time, measured on held-out labels | [js3/score/](js3/score/README.md): [ORIGINS.md](js3/score/ORIGINS.md), [CHANGES-TO-MEASURE.md](js3/score/CHANGES-TO-MEASURE.md) (`1c9a37e`, written before the held-out answers were opened), [EXPERIMENTS.md](js3/score/EXPERIMENTS.md) (`cb1b50c`), on my held-out set [js3/heldout/2026-11-21T044414Z/](js3/heldout/2026-11-21T044414Z/README.md) (`1e2b1e1`) |
 | A fresh test of v1.1 on labels that played no part in it (added 2026-11-24) | [js3/fresh/2026-11-22T084738Z/](js3/fresh/2026-11-22T084738Z/README.md): sealed with its predictions before any verdict (`9cdf591`), my 20 verdicts (`1bbbcf6`), [RESULTS.md](js3/fresh/2026-11-22T084738Z/RESULTS.md) (`c01dc04`) |
 | The sign-off and the driver's seat | [js3/SIGNOFF.md](js3/SIGNOFF.md) |
@@ -39,8 +39,8 @@ The course folder holds a snapshot of one commit (its SNAPSHOT.md), so the hashe
 
 ## Language and toolchain
 
-- Python 3.9 or newer, standard library only: nothing to install. The 348 tests pass on Python 3.12.14 and on macOS's
-  own 3.9.6 (run by Claude Code on 2026-11-22).
+- Python 3.9 or newer, standard library only: nothing to install. The 398 tests pass on Python 3.12.14 and on macOS's
+  own 3.9.6 (run by Claude Code on 2026-11-24).
 - No network and no Claude for any JS3 command. The filter reads the boards' answers saved by JS2's loop
   (`runs/2026-11-20T114036Z/`), each checked against the SHA-256 that the filter run recorded.
 - The one live MCP run used the Claude Code CLI 2.1.326 that the Claude desktop app bundles, signed in with a claude.ai
@@ -52,7 +52,7 @@ The course folder holds a snapshot of one commit (its SNAPSHOT.md), so the hashe
 ```bash
 python3 -m unittest discover -s tests -t .
 ```
-348 offline tests, about 15 seconds.
+398 offline tests, about 50 seconds.
 
 ```bash
 python3 -m job_agent filter
@@ -76,6 +76,17 @@ python3 -m unittest tests.test_aravind_own_rule -v
 My own test, written from my R1 before reading the filter's code.
 
 ```bash
+python3 tools/score_fresh.py js3/fresh/2026-11-22T084738Z
+python3 tools/baselines.py --check
+python3 tools/boilerplate_check.py --check
+python3 tools/card_rebuild_check.py --check
+python3 tools/mcp_runtime_trace.py check js3/mcp/runtime/2026-11-25T023441Z
+```
+Rescore the fresh set (it checks the sealed file's SHA-256 and that my verdicts are committed), check that the three
+after-the-fact reports in `js3/checks/` rebuild from the committed files, and run both MCP servers again under the
+audit hook to check that every recorded summary comes out the same (macOS, for `sandbox-exec`).
+
+```bash
 python3 tools/mutants.py
 ```
 Plants 82 mistakes in a copy of the code, one at a time (JS1's and GATE.md's wrong versions, FILTER.md's W1 to W7 and
@@ -93,6 +104,10 @@ The MCP server, our client and the Claude Code run have their own commands in [j
   committed before its answers were opened; the scoring; the card fix; my own test and my recomputation (3:18 and
   3:19 AM); the held-out measurement (3:36 AM); my v1.1 calls; FILTER.md v1.1 and its run (3:47 AM); the planted
   mistakes again after v1.1 (`js3/checks/`).
+- **2026-11-24:** the MCP client fix (8:44 PM ET) after a read of eleven classmates' JS3 work; the fresh set for v1.1,
+  sealed with Claude Code's predictions (9:01 PM), my 20 verdicts (9:07 PM) and its one scoring (9:08 PM); the
+  after-the-fact checks in `js3/checks/` and the tests that rebuild every result; runtime traces of both MCP servers on
+  Python 3.12.14 and 3.9.6 (9:34 PM).
 
 ## Results
 
@@ -103,6 +118,12 @@ The MCP server, our client and the Claude Code run have their own commands in [j
   The filter's deciding rule there was my own R4: the title, "Forward Deployed Software Engineer, New Grad - Warp
   Speed", is one R4 excludes, so my blind Keep also went against my own rule; I kept R4 as written. FILTER.md v1.1
   rejects the same 1,409 postings as v1.0, so the bound holds for v1.1's rejects unchanged.
+- **The MCP servers at run time** ([js3/mcp/runtime/2026-11-25T023441Z/](js3/mcp/runtime/2026-11-25T023441Z/README.md)):
+  traced under a Python audit hook through our client's five sessions on Python 3.12.14 and 3.9.6, neither server
+  wrote a file (ours wrote only its transcript, when asked), opened a socket or started a process, and with the
+  network denied by `sandbox-exec` every answer was the same. On 3.9.6, though, our server loads the `subprocess`
+  module, because the standard library's `platform` imports it; the evaluation's import-graph claim had missed that,
+  and now says so. The server as evaluated (`a54c424`) and today's answer alike except for FILTER.md's hash.
 - **Against constant answers** ([js3/checks/BASELINES.md](js3/checks/BASELINES.md), computed after the fact):
   "reject everything" agrees with me on 35 of the 52 audit cards I judged and "keep everything" on 17, against the
   filter's 51; on the held-out set, 15 and 12 of 27 against 27. 28 of the 30 random rejects fail R4 and only 2 sit
@@ -163,7 +184,9 @@ The MCP server, our client and the Claude Code run have their own commands in [j
 - My held-out set guided my v1.1 calls, so it is development data now. The fresh set tests v1.1 on 20 new labels:
   small draws from strata of one day's saved answers, not a rate for all postings.
 - The MCP server is a subset of MCP 2025-11-25, not conformant and not shown to be secure, and it stays on FILTER.md
-  v1.0, the version it was evaluated with.
+  v1.0, the version it was evaluated with. Two commits after my trust decision changed it or the modules it calls
+  (`b8e3a25`, `5dff01f`), which by the evaluation's own terms reopens the decision ([EVALUATION-OWN.md](js3/mcp/EVALUATION-OWN.md),
+  "Changes after the trust decision"). The runtime traces show what the servers did in these sessions only.
 - Not in v1.1: the shortlist saying "the posting does not say" for claims 5 to 7, and two rules that never fired.
 
 ## Contents
@@ -173,8 +196,8 @@ The MCP server, our client and the Claude Code run have their own commands in [j
 | [FILTER.md](FILTER.md), [filter-drafts/](filter-drafts/) | The filter (v1.0 and v1.1) and my four drafts of its Section 1 |
 | [FILTER-CHANGES-PENDING.md](FILTER-CHANGES-PENDING.md) | What v1.0's run showed for v1.1, with its status |
 | `job_agent/` | The agent: JS1's watch and rule, JS2's loop, and JS3's `filter.py`, `filter_run.py` and `mcp_server.py` |
-| `tools/` | The kits, the scorers, the held-out experiment tool, the MCP client and run script, the mutants |
-| `tests/` | 348 tests |
+| `tools/` | The kits, the scorers, the held-out experiment tool, the fresh set's kit, scorer and chat view, the after-the-fact checks, the MCP client, run script and runtime trace, the mutants |
+| `tests/` | 398 tests |
 | `js3/` | JS3's filter runs, kits, labels, results, MCP work, score work and sign-off |
 | `runs/` | The board answers JS2's loop saved, which the filter reads |
 | GATE.md, CONTRACT.md, BOUNDARY-TESTS.md, LABELING-RULE.md, `boards.json`, `persona/`, `prompts/`, `labels/`, `experiment/` | From JS1 and JS2, still read by the code |
