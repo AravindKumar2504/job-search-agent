@@ -30,6 +30,7 @@ def load(name):
 
 fresh_kit = load("fresh_kit")
 score_fresh = load("score_fresh")
+chat_cards = load("chat_cards")
 BUILT = {}
 
 
@@ -121,6 +122,15 @@ class FreshKitTest(unittest.TestCase):
     def test_a_second_build_in_the_same_place_is_refused(self):
         with self.assertRaises(SystemExit):
             fresh_kit.build(BUILT["root"] / "built")
+
+    @unittest.skipUnless(COMMITTED.exists(), "the fresh set is not committed yet")
+    def test_the_chat_view_is_made_from_the_cards_alone(self):
+        cards = (COMMITTED / "CARDS.md").read_text(encoding="utf-8")
+        view = (COMMITTED / "CHAT-CARDS.md").read_text(encoding="utf-8")
+        self.assertEqual(view, chat_cards.render(cards))
+        self.assertEqual(re.findall(r"^\*\*(\d\d)\. ", view, re.M), [f"{n:02}" for n in range(1, 21)])
+        for a in self.answers:  # no answer field reaches the view
+            self.assertNotIn(a["stratum_name"], view)
 
     def test_build_systems_moves_no_recommendation(self):
         self.assertIn("No posting's v1.1 recommendation changes with \"build systems\" back",
