@@ -13,7 +13,9 @@ Written by Claude Code on 2026-11-22. Every number below recomputes from the fil
    (`b8e3a25`).
 3. **Measured once, on labels held out:** [`EXPERIMENTS.md`](EXPERIMENTS.md), against Aravind's 30 frozen held-out
    verdicts (`1e2b1e1`), on 2026-11-22 at 08:36 UTC (`cb1b50c`). Every run is kept in `runs/`.
-4. **What persistence is not proof of:** the last section of `EXPERIMENTS.md`.
+4. **What persistence is not proof of:** the last section of `EXPERIMENTS.md`. JS1 showed the other half: the
+   Claude judge's repeated verdicts were repeatable and still wrong on two of five postings
+   ([`experiment/SAMPLING.md`](../../experiment/SAMPLING.md)), so agreement across runs is not correctness either.
 
 ## What the measurement showed
 

@@ -54,6 +54,14 @@ applies to the code JS3 builds on.
   was copied.
 - Two classmates' JS3 folders on the course repository's main branch, read by Claude Code on 2026-11-20 to see what the
   brief's parts look like in practice; nothing was copied.
+- Eleven classmates' JS3 submissions, read by Claude Code at my request on 2026-11-24 at upstream commit `671d983`: the
+  folders `fall-2026/` `pavan-m`, `prasad-s`, `rayudu-h`, `riya-k`, `smit-p`, `sreevarshan-s`, `tushar-p`, `weiting-w`
+  and `yash-s`, and two open pull requests,
+  [#52](https://github.com/nikbearbrown/info-7375-prompt-engineering-for-generative-ai/pull/52) (`om-r`) and
+  [#48](https://github.com/nikbearbrown/info-7375-prompt-engineering-for-generative-ai/pull/48) (`swathi-e`). They were
+  read for approaches only; no code or text was copied. Comparing them with this work led to the checks added on
+  2026-11-24: the baselines, the runtime checks of both servers, the boilerplate check, the card rebuild check, the
+  tests that rebuild the results, and the fresh set for v1.1.
 - The board answers that JS2's loop saved on 2026-11-20 from the public job-board endpoints of OpenAI (Ashby), Verkada
   (Greenhouse) and Palantir (Lever).
 - Python's standard library, and the Claude Code CLI 2.1.326 as the MCP client in one live run.
